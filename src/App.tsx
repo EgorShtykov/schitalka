@@ -18,6 +18,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import './App.css'
+import { MathText } from './components/MathText'
 import { answersMatch, matchingPitfall } from './lib/math'
 import type { Difficulty, Grade, Problem } from './lib/math'
 import { getCourseMastery, getTopicMastery, TOPIC_ACCURACY_GOAL, TOPIC_TASK_GOAL } from './lib/mastery'
@@ -416,7 +417,7 @@ export default function App() {
                     <div className="instruction">{problem.instruction ?? 'Вычисли'}</div>
                     {!activeTopic && <div className="problem-topic">{problem.topicTitle}</div>}
                   </div>
-                  <div className={`expression ${problem.expression.length > 70 ? 'long' : ''}`}>{problem.expression}</div>
+                  <div className={`expression ${problem.expression.length > 70 ? 'long' : ''}`}><MathText text={problem.expression} /></div>
                   <div className="answer-area">
                     <label htmlFor="answer">Твой ответ</label>
                     <div className={`answer-row ${status}`}>
@@ -457,14 +458,14 @@ export default function App() {
                   {hintCount > 0 && (
                     <div className="solution-steps" aria-label="Шаги решения">
                       <div className="solution-title">Разбираем по шагам</div>
-                      {problem.steps.slice(0, hintCount).map((step, index) => <div className="solution-step" key={`${index}-${step}`}><span>{index + 1}</span><p>{step}</p></div>)}
+                      {problem.steps.slice(0, hintCount).map((step, index) => <div className="solution-step" key={`${index}-${step}`}><span>{index + 1}</span><p><MathText text={step} /></p></div>)}
                     </div>
                   )}
 
                   {feedback && (
                     <div id="feedback" className={`feedback ${status}`} role="status" aria-live="polite">
                       {status === 'correct' ? <CheckCircle2 size={23} /> : status === 'wrong' ? <XCircle size={23} /> : <BookOpen size={23} />}
-                      <div><strong>{status === 'revealed' ? `Ответ: ${problem.displayAnswer}` : status === 'wrong' ? 'Нужна ещё попытка' : feedback}</strong>{status === 'correct' && <span>Ответ: {problem.displayAnswer}</span>}{status === 'wrong' && <span>{feedback}</span>}</div>
+                      <div><strong>{status === 'revealed' ? <>Ответ: <MathText text={problem.displayAnswer} /></> : status === 'wrong' ? 'Нужна ещё попытка' : feedback}</strong>{status === 'correct' && <span>Ответ: <MathText text={problem.displayAnswer} /></span>}{status === 'wrong' && <span>{feedback}</span>}</div>
                     </div>
                   )}
                 </div>
