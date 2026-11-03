@@ -15,6 +15,8 @@ export interface Problem {
   instruction?: string
   answerHint?: string
   pitfalls?: Pitfall[]
+  topicId?: string
+  topicTitle?: string
 }
 
 export interface Topic {

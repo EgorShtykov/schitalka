@@ -1,32 +1,33 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Geist:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Geist:wght@400;500;600;700;800&family=Neucha&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --mint-100: oklch(0.956 0.027 132);
-  --mint-200: oklch(0.925 0.038 132);
-  --forest-700: oklch(0.374 0.078 155);
-  --forest-800: oklch(0.29 0.06 155);
-  --gold-500: oklch(0.825 0.158 83);
-  --gold-300: oklch(0.89 0.12 84);
-  --ink-900: oklch(0.235 0.035 153);
-  --ink-600: oklch(0.46 0.025 150);
-  --paper: oklch(0.992 0.008 105);
-  --coral-600: oklch(0.55 0.17 29);
-  --blue-400: oklch(0.67 0.07 246);
+  --cream: #fff8ef;
+  --blush: #edccbe;
+  --brown: #331917;
+  --orange: #d1410f;
+  --light-green: #d8ce7e;
+  --green: #003933;
+  --mint: #edf5e9;
+  --gold: #ffbf2e;
+  --paper: #fffdf9;
+  --ink-muted: #765f5a;
+  --blue-cat: #8da9ce;
+  --coral: #b53b28;
 
-  --background: var(--mint-100);
+  --background: var(--cream);
   --surface: var(--paper);
-  --text: var(--ink-900);
-  --text-muted: var(--ink-600);
-  --accent: var(--gold-500);
-  --primary: var(--forest-700);
-  --success: var(--forest-700);
-  --error: var(--coral-600);
-  --line: color-mix(in oklch, var(--forest-700) 18%, transparent);
-  --line-strong: color-mix(in oklch, var(--forest-700) 35%, transparent);
+  --text: var(--brown);
+  --text-muted: var(--ink-muted);
+  --accent: var(--orange);
+  --primary: var(--green);
+  --success: var(--green);
+  --error: var(--coral);
+  --line: color-mix(in oklch, var(--brown) 14%, transparent);
+  --line-strong: color-mix(in oklch, var(--brown) 25%, transparent);
   --radius: 18px;
   font-family: 'Geist', 'Segoe UI', sans-serif;
   color: var(--text);
@@ -76,7 +77,7 @@ button:disabled {
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 3px solid var(--gold-500);
+  outline: 3px solid var(--gold);
   outline-offset: 3px;
 }
 
