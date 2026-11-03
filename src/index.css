@@ -86,6 +86,25 @@ select:focus-visible {
   background: var(--gold-300);
 }
 
+.math-text {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.math-text .katex {
+  font-size: 1em;
+}
+
+.expression .math-text {
+  display: inline-flex;
+  justify-content: center;
+}
+
+.solution-step .math-text .katex,
+.feedback .math-text .katex {
+  white-space: normal;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
