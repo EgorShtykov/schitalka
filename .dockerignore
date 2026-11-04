@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.github
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+*.swp
+*.log
+npm-debug.log*
+.DS_Store
