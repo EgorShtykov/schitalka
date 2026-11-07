@@ -35,7 +35,7 @@ function noteLoginFailure(key: string) {
   const current = loginAttempts.get(key);
   loginAttempts.set(key, {
     count: current && current.resetAt > Date.now() ? current.count + 1 : 1,
-    resetAt: current && current.resetAt > Date.now() ? current.resetAt : Date.now() + 5 * 60 * 1000,
+    resetAt: current && current.resetAt > Date.now() ? Date.now() + 5 * 60 * 1000 : Date.now() + 5 * 60 * 1000,
   });
 }
 
@@ -75,6 +75,7 @@ export const accountRouter = createRouter({
           unionId,
           name: input.login.trim(),
           passwordHash,
+          role: unionId === env.ownerUnionId ? "admin" : "user",
           lastSignInAt: new Date(),
         }).$returningId();
         const id = inserted[0]?.id;
