@@ -9,6 +9,7 @@ import {
   GraduationCap,
   KeyRound,
   Paperclip,
+  PiggyBank,
   Plus,
   Bot,
   School,
@@ -20,6 +21,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { trpc } from "@/providers/trpc";
+import { StipendTeacher } from "./StipendTeacher";
 import "./SchoolPage.css";
 
 type SchoolPageProps = {
@@ -88,7 +90,7 @@ export function SchoolPage({
 function TeacherCabinet() {
   const utils = trpc.useUtils();
   const overview = trpc.teacher.overview.useQuery(undefined, { retry: false });
-  const [tab, setTab] = useState<"classes" | "assignments" | "grades">(
+  const [tab, setTab] = useState<"classes" | "assignments" | "grades" | "stipend">(
     "classes"
   );
   const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
@@ -236,6 +238,14 @@ function TeacherCabinet() {
         >
           <GraduationCap size={17} />
           Журнал оценок
+        </button>
+        <button
+          type="button"
+          className={tab === "stipend" ? "active" : ""}
+          onClick={() => setTab("stipend")}
+        >
+          <PiggyBank size={17} />
+          Стипендия
         </button>
       </div>
       {error && (
@@ -813,7 +823,8 @@ function TeacherCabinet() {
                                     event.nativeEvent as SubmitEvent
                                   ).submitter as HTMLButtonElement | null;
                                   const status = submitter?.value as
-                                    "reviewed" | "needs_revision";
+                                    | "reviewed"
+                                    | "needs_revision";
                                   void run(
                                     reviewSubmission.mutateAsync({
                                       submissionId: submission.id,
@@ -1008,6 +1019,8 @@ function TeacherCabinet() {
           </section>
         </div>
       )}
+
+      {tab === "stipend" && <StipendTeacher run={run} />}
     </div>
   );
 }
@@ -1068,9 +1081,7 @@ function StudentCabinet() {
         throw new Error(payload.error || "Не удалось удалить файл");
       await utils.school.overview.invalidate();
     } catch (reason) {
-      setError(
-        reason instanceof Error ? reason.message : "Не удалось удалить файл"
-      );
+      setError(reason instanceof Error ? reason.message : "Не удалось удалить файл");
     }
   };
 
