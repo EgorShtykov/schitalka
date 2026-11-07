@@ -17,6 +17,7 @@ async function exchangeAuthCode(
 ): Promise<TokenResponse> {
   const body = new URLSearchParams({
     grant_type: "authorization_code",
+    code,
     client_id: env.appId,
     redirect_uri: redirectUri,
     client_secret: env.appSecret,
