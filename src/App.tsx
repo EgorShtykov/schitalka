@@ -10,43 +10,35 @@ import {
   Flag,
   Lightbulb,
   Menu,
+  Palette,
+  Plus,
   RotateCcw,
   Sparkles,
+  Swords,
   Target,
   Trophy,
   X,
   XCircle,
 } from 'lucide-react'
 import './App.css'
+import { AccountDialog } from './components/AccountDialog'
+import { CatMascot } from './components/CatMascot'
+import { CompetitionPage } from './components/CompetitionPage'
 import { MathText } from './components/MathText'
+import { RewardBar } from './components/RewardBar'
+import { TheoryPage } from './components/TheoryPage'
+import { Workshop } from './components/Workshop'
 import { answersMatch, matchingPitfall } from './lib/math'
 import type { Difficulty, Grade, Problem } from './lib/math'
 import { getCourseMastery, getTopicMastery, TOPIC_ACCURACY_GOAL, TOPIC_TASK_GOAL } from './lib/mastery'
 import { createProblem, topicsForGrade } from './lib/topics'
+import { trpc } from './providers/trpc'
+import type { CloudState, ProgressState, TopicId } from '@contracts/learning'
+import { emptyProgress } from '@contracts/learning'
 
 type AnswerStatus = 'idle' | 'correct' | 'wrong' | 'revealed'
 type SessionResult = 'clean' | 'assisted'
-
-interface TopicProgress {
-  solved: number
-  attempts: number
-  firstTry: number
-}
-
-interface ProgressState extends TopicProgress {
-  streak: number
-  bestStreak: number
-  topics: Record<string, TopicProgress>
-}
-
-const emptyProgress: ProgressState = {
-  solved: 0,
-  attempts: 0,
-  firstTry: 0,
-  streak: 0,
-  bestStreak: 0,
-  topics: {},
-}
+type AppView = 'practice' | 'theory' | 'workshop' | 'competition'
 
 const grades: Grade[] = [4, 5, 6, 7, 8, 9]
 const difficultyLabels: { id: Difficulty; label: string }[] = [
@@ -61,7 +53,12 @@ function loadProgress(): ProgressState {
     const saved = localStorage.getItem('schitalka-progress-v1')
     if (!saved) return emptyProgress
     const parsed = JSON.parse(saved) as Partial<ProgressState>
-    return { ...emptyProgress, ...parsed, topics: parsed.topics ?? {} }
+    return {
+      ...emptyProgress,
+      ...parsed,
+      topics: parsed.topics ?? {},
+      masteryTopics: parsed.masteryTopics ?? {},
+    }
   } catch {
     return emptyProgress
   }
@@ -88,31 +85,8 @@ function Brand() {
   )
 }
 
-function CatMascot({ happy = false }: { happy?: boolean }) {
-  return (
-    <svg className="cat-mascot" viewBox="0 0 120 100" role="img" aria-label={happy ? 'Довольный кот' : 'Кот-думатель'}>
-      <path d="M29 39 24 12l22 14c9-4 20-4 29 0l22-14-5 28c7 9 8 24 2 35-8 15-24 20-35 20S35 90 28 75c-6-12-5-27 1-36Z" fill="#8da9ce" stroke="#003933" strokeWidth="2.5" strokeLinejoin="round" />
-      <path d="M32 24l2 13 9-8-11-5Zm56 0-2 13-9-8 11-5Z" fill="#edccbe" />
-      <path d="M42 54h12m12 0h12" fill="none" stroke="#331917" strokeWidth="3" strokeLinecap="round" />
-      {happy ? (
-        <>
-          <path d="m45 52 4 4 4-4m14 0 4 4 4-4" fill="none" stroke="#331917" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M51 68c5 7 13 7 18 0" fill="none" stroke="#331917" strokeWidth="2.5" strokeLinecap="round" />
-        </>
-      ) : (
-        <>
-          <circle cx="49" cy="53" r="2.5" fill="#331917" />
-          <circle cx="71" cy="53" r="2.5" fill="#331917" />
-          <path d="M54 70c4-3 8-3 12 0" fill="none" stroke="#331917" strokeWidth="2.5" strokeLinecap="round" />
-        </>
-      )}
-      <path d="m60 60-4 3h8l-4-3Z" fill="#edccbe" />
-      <path d="M39 63 17 60m22 8-21 3m63-8 22-3M81 68l21 3" fill="none" stroke="#003933" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  )
-}
-
 export default function App() {
+  const [view, setView] = useState<AppView>('practice')
   const [grade, setGrade] = useState<Grade>(4)
   const [topicId, setTopicId] = useState('mixed')
   const [difficulty, setDifficulty] = useState<Difficulty>('easy')
@@ -131,8 +105,41 @@ export default function App() {
   const [elapsed, setElapsed] = useState(0)
   const [progress, setProgress] = useState<ProgressState>(loadProgress)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
+  const [previewTheme, setPreviewTheme] = useState('classic')
+  const [workshopError, setWorkshopError] = useState('')
+  const [busyTheme, setBusyTheme] = useState<string | null>(null)
+  const [syncError, setSyncError] = useState('')
+  const [rewardNotice, setRewardNotice] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const lastTopicRef = useRef<string | undefined>(problem.topicId)
+  const cloudQueue = useRef<Promise<void>>(Promise.resolve())
+  const migrationStartedFor = useRef<number | null>(null)
+
+  const utils = trpc.useUtils()
+  const meQuery = trpc.account.current.useQuery(undefined, { retry: false, staleTime: 30_000 })
+  const user = meQuery.data ?? null
+  const isAuthenticated = Boolean(user)
+  const cloudQuery = trpc.progress.state.useQuery(undefined, {
+    enabled: isAuthenticated,
+    retry: false,
+    refetchInterval: isAuthenticated ? 15_000 : false,
+  })
+  const cloud = cloudQuery.data
+  const attemptMutation = trpc.progress.attempt.useMutation()
+  const migrateMutation = trpc.progress.migrate.useMutation()
+  const purchaseMutation = trpc.progress.purchase.useMutation()
+  const selectThemeMutation = trpc.progress.selectTheme.useMutation()
+  const resetMutation = trpc.progress.reset.useMutation()
+  const gradeMutation = trpc.progress.setGrade.useMutation()
+  const breakStreakMutation = trpc.progress.breakStreak.useMutation()
+
+  const applyCloudState = useCallback((state: CloudState) => {
+    utils.progress.state.setData(undefined, state)
+    setProgress(state.progress)
+    setPreviewTheme(state.selectedTheme)
+    setSyncError('')
+  }, [utils])
 
   const gradeTopics = useMemo(() => topicsForGrade(grade), [grade])
   const activeTopic = topicId === 'mixed' ? null : gradeTopics.find((topic) => topic.id === topicId)
@@ -140,11 +147,26 @@ export default function App() {
   const description = activeTopic?.description ?? `Новые форматы и темы ${grade} класса — в случайном порядке, без повторения темы подряд.`
   const rule = activeTopic?.rule ?? 'Каждый ответ засчитывается в свою тему'
   const accuracy = progress.attempts ? Math.round(progress.firstTry / progress.attempts * 100) : 0
-  const topicMastery = getTopicMastery(activeTopic ? progress.topics[activeTopic.id] : undefined)
-  const courseMastery = useMemo(() => getCourseMastery(gradeTopics, progress.topics), [gradeTopics, progress.topics])
+  const topicMastery = getTopicMastery(activeTopic ? progress.masteryTopics[activeTopic.id] : undefined)
+  const courseMastery = useMemo(
+    () => getCourseMastery(gradeTopics, progress.masteryTopics),
+    [gradeTopics, progress.masteryTopics],
+  )
   const currentMastery = activeTopic ? topicMastery : courseMastery
   const remaining = currentMastery.remaining
   const masteryComplete = currentMastery.complete
+  const plusBalance = isAuthenticated ? cloud?.plusBalance ?? 0 : 0
+  const sparkBalance = isAuthenticated ? cloud?.sparkBalance ?? 0 : 0
+  const trophies = isAuthenticated ? cloud?.trophies ?? { gold: 0, silver: 0, bronze: 0 } : { gold: 0, silver: 0, bronze: 0 }
+  const sparkEvents = isAuthenticated ? cloud?.sparkEvents ?? [] : []
+  const purchasedThemeIds = isAuthenticated ? cloud?.purchasedThemeIds ?? [] : []
+  const syncLabel = !isAuthenticated
+    ? 'Локально · в этом браузере'
+    : migrateMutation.isPending || attemptMutation.isPending
+      ? 'Облако · сохраняем…'
+      : syncError
+        ? 'Облако · нужна перепроверка'
+        : 'Облако · сохранено'
 
   const nextProblem = useCallback(() => {
     const next = createProblem(grade, topicId, difficulty, topicId === 'mixed' ? lastTopicRef.current : undefined)
@@ -173,12 +195,47 @@ export default function App() {
   }, [completed, sessionKey])
 
   useEffect(() => {
+    document.documentElement.dataset.theme = previewTheme
+  }, [previewTheme])
+
+  useEffect(() => {
+    if (!isAuthenticated || !cloud) return
+    setProgress(cloud.progress)
+    if (!gradeMutation.isPending && cloud.grade >= 4 && cloud.grade <= 9) setGrade(cloud.grade as Grade)
+  }, [cloud, isAuthenticated, gradeMutation.isPending])
+
+  useEffect(() => {
+    if (cloud?.selectedTheme) setPreviewTheme(cloud.selectedTheme)
+  }, [cloud?.selectedTheme])
+
+  useEffect(() => {
+    if (!user || !cloud || cloud.migratedAt || migrationStartedFor.current === user.id) return
+    migrationStartedFor.current = user.id
+    const localProgress = loadProgress()
+    migrateMutation.mutateAsync({ progress: localProgress })
+      .then((result) => {
+        applyCloudState(result.state)
+        try { localStorage.removeItem('schitalka-progress-v1') } catch { /* Cloud copy is already safe. */ }
+      })
+      .catch((reason) => {
+        setSyncError(reason instanceof Error ? reason.message : 'Не удалось перенести локальный прогресс')
+      })
+  }, [user, cloud, migrateMutation, applyCloudState])
+
+  useEffect(() => {
+    if (!rewardNotice) return
+    const timer = window.setTimeout(() => setRewardNotice(''), 4500)
+    return () => window.clearTimeout(timer)
+  }, [rewardNotice])
+
+  useEffect(() => {
+    if (isAuthenticated || meQuery.isLoading) return
     try {
       localStorage.setItem('schitalka-progress-v1', JSON.stringify(progress))
     } catch {
       // The trainer still works when storage is unavailable.
     }
-  }, [progress])
+  }, [progress, isAuthenticated, meQuery.isLoading])
 
   useEffect(() => {
     if (!completed) inputRef.current?.focus({ preventScroll: true })
@@ -195,8 +252,30 @@ export default function App() {
 
   const recordAttempt = (correct: boolean, clean: boolean) => {
     const trackedTopicId = problem.topicId ?? topicId
+    const countsForMastery = difficulty !== 'easy'
+    if (isAuthenticated) {
+      const topicTitle = problem.topicTitle
+      cloudQueue.current = cloudQueue.current
+        .catch(() => undefined)
+        .then(async () => {
+          const result = await attemptMutation.mutateAsync({
+            attemptId: crypto.randomUUID(),
+            topicId: trackedTopicId as TopicId,
+            correct,
+            clean,
+            difficulty,
+          })
+          applyCloudState(result.state)
+          if (result.awarded) setRewardNotice(`+1 плюсик за первый зачёт темы «${topicTitle}»`)
+        })
+        .catch((reason) => {
+          setSyncError(reason instanceof Error ? reason.message : 'Ответ не сохранился. Проверь соединение.')
+        })
+      return
+    }
     setProgress((previous) => {
       const oldTopic = previous.topics[trackedTopicId] ?? { solved: 0, attempts: 0, firstTry: 0 }
+      const oldMasteryTopic = previous.masteryTopics[trackedTopicId] ?? { solved: 0, attempts: 0, firstTry: 0 }
       const streak = correct ? previous.streak + 1 : 0
       return {
         solved: previous.solved + (correct ? 1 : 0),
@@ -212,6 +291,14 @@ export default function App() {
             firstTry: oldTopic.firstTry + (clean ? 1 : 0),
           },
         },
+        masteryTopics: countsForMastery ? {
+          ...previous.masteryTopics,
+          [trackedTopicId]: {
+            solved: oldMasteryTopic.solved + (correct ? 1 : 0),
+            attempts: oldMasteryTopic.attempts + 1,
+            firstTry: oldMasteryTopic.firstTry + (clean ? 1 : 0),
+          },
+        } : previous.masteryTopics,
       }
     })
   }
@@ -226,15 +313,21 @@ export default function App() {
     const clean = attemptsOnProblem === 0 && hintCount === 0
     if (answersMatch(answer, problem.answer)) {
       const trackedTopicId = problem.topicId ?? topicId
-      const old = progress.topics[trackedTopicId] ?? { solved: 0, attempts: 0, firstTry: 0 }
+      const old = progress.masteryTopics[trackedTopicId] ?? { solved: 0, attempts: 0, firstTry: 0 }
       const nextMastery = getTopicMastery({
         solved: old.solved + 1,
         attempts: old.attempts + 1,
         firstTry: old.firstTry + (clean ? 1 : 0),
       })
-      const justCompleted = nextMastery.complete && !getTopicMastery(old).complete
+      const justCompleted = difficulty !== 'easy' && nextMastery.complete && !getTopicMastery(old).complete
       setStatus('correct')
-      setFeedback(justCompleted ? `Тема «${problem.topicTitle}» завершена!` : praise[Math.floor(Math.random() * praise.length)])
+      setFeedback(
+        justCompleted
+          ? `Тема «${problem.topicTitle}» завершена!`
+          : difficulty === 'easy'
+            ? 'Верно! Для зачёта выбери уровень «Уверенно» или «Сложно».'
+            : praise[Math.floor(Math.random() * praise.length)],
+      )
       if (clean) setSessionCorrect((value) => value + 1)
       setResults((items) => [...items, clean ? 'clean' : 'assisted'])
       recordAttempt(true, clean)
@@ -258,7 +351,13 @@ export default function App() {
     setStatus('revealed')
     setFeedback('Разбери каждый шаг, затем переходи к следующему заданию.')
     setResults((items) => [...items, 'assisted'])
-    setProgress((previous) => ({ ...previous, streak: 0 }))
+    if (isAuthenticated) {
+      breakStreakMutation.mutateAsync()
+        .then(() => utils.progress.state.invalidate())
+        .catch((reason) => setSyncError(reason instanceof Error ? reason.message : 'Не удалось синхронизировать серию'))
+    } else {
+      setProgress((previous) => ({ ...previous, streak: 0 }))
+    }
   }
 
   const goNext = () => {
@@ -275,18 +374,111 @@ export default function App() {
     setGrade(value)
     setTopicId('mixed')
     setMenuOpen(false)
+    if (isAuthenticated) {
+      void utils.progress.state.cancel()
+      cloudQueue.current = cloudQueue.current
+        .catch(() => undefined)
+        .then(async () => {
+          const state = await gradeMutation.mutateAsync({ grade: value })
+          applyCloudState(state)
+        })
+        .catch((reason) => setSyncError(reason instanceof Error ? reason.message : 'Класс не сохранился'))
+    }
   }
   const selectTopic = (value: string) => {
     setTopicId(value)
+    setView('practice')
     setMenuOpen(false)
   }
+  const startPractice = (value?: string) => {
+    setTopicId(value ?? 'mixed')
+    setView('practice')
+    setSessionKey((key) => key + 1)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
   const resetProgress = () => {
-    if (window.confirm('Сбросить всю статистику, прогресс тем и серии? Сами задания останутся.')) setProgress(emptyProgress)
+    const message = isAuthenticated
+      ? 'Сбросить статистику и прогресс тем? Заработанные плюсики и купленные оформления сохранятся.'
+      : 'Сбросить всю локальную статистику, прогресс тем и серии? Сами задания останутся.'
+    if (!window.confirm(message)) return
+    if (isAuthenticated) {
+      resetMutation.mutateAsync()
+        .then(applyCloudState)
+        .catch((reason) => setSyncError(reason instanceof Error ? reason.message : 'Не удалось сбросить прогресс'))
+    } else {
+      setProgress(emptyProgress)
+    }
+  }
+  const openWorkshop = () => {
+    setView('workshop')
+    setWorkshopError('')
+    setMenuOpen(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  const openCompetition = () => {
+    setView('competition')
+    setMenuOpen(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  const handlePurchase = async (themeId: string) => {
+    setBusyTheme(themeId)
+    setWorkshopError('')
+    try {
+      const state = await purchaseMutation.mutateAsync({ themeId })
+      applyCloudState(state)
+    } catch (reason) {
+      setWorkshopError(reason instanceof Error ? reason.message : 'Не удалось открыть оформление')
+    } finally {
+      setBusyTheme(null)
+    }
+  }
+  const handleSelectTheme = async (themeId: string) => {
+    setBusyTheme(themeId)
+    setWorkshopError('')
+    try {
+      const state = await selectThemeMutation.mutateAsync({ themeId })
+      applyCloudState(state)
+    } catch (reason) {
+      setWorkshopError(reason instanceof Error ? reason.message : 'Не удалось включить оформление')
+    } finally {
+      setBusyTheme(null)
+    }
+  }
+  const handleAuthenticated = () => {
+    migrationStartedFor.current = null
+    try { sessionStorage.removeItem('schitalka-competition-room') } catch { /* Account isolation does not depend on tab storage. */ }
+    setProgress(emptyProgress)
+    setPreviewTheme('classic')
+    setSyncError('')
+    utils.progress.state.reset()
+  }
+  const handleLogout = () => {
+    migrationStartedFor.current = null
+    try { sessionStorage.removeItem('schitalka-competition-room') } catch { /* Account isolation does not depend on tab storage. */ }
+    utils.progress.state.reset()
+    setProgress(loadProgress())
+    setPreviewTheme('classic')
+    setRewardNotice('')
+    setSyncError('')
   }
   const formatTime = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
 
   const navigation = (
     <>
+      <div className="section-switch" aria-label="Разделы сайта">
+        <button type="button" className={view === 'practice' ? 'active' : ''} aria-pressed={view === 'practice'} onClick={() => { setView('practice'); setMenuOpen(false) }}>
+          <Target size={16} />Тренировка
+        </button>
+        <button type="button" className={view === 'theory' ? 'active' : ''} aria-pressed={view === 'theory'} onClick={() => { setView('theory'); setMenuOpen(false) }}>
+          <BookOpen size={16} />Теория
+        </button>
+        <button type="button" className={view === 'competition' ? 'active' : ''} aria-pressed={view === 'competition'} onClick={openCompetition}>
+          <Swords size={16} />Арена
+        </button>
+        <button type="button" className={view === 'workshop' ? 'active' : ''} aria-pressed={view === 'workshop'} onClick={openWorkshop}>
+          <Palette size={16} />Стиль
+        </button>
+      </div>
       <div className="course-mini">
         <div><span>Курс · {grade} класс</span><strong>{courseMastery.completed}/{courseMastery.total} тем</strong></div>
         <div className="course-mini-track" aria-label={`Освоено ${courseMastery.score}% курса`}><span style={{ width: `${courseMastery.score}%` }} /></div>
@@ -305,7 +497,7 @@ export default function App() {
           <span className="topic-count">{courseMastery.completed}/{courseMastery.total}</span>
         </button>
         {gradeTopics.map((topic) => {
-          const mastery = getTopicMastery(progress.topics[topic.id])
+          const mastery = getTopicMastery(progress.masteryTopics[topic.id])
           return (
             <button type="button" key={topic.id} className={`topic-button ${topicId === topic.id ? 'active' : ''} ${mastery.complete ? 'mastered' : ''}`} onClick={() => selectTopic(topic.id)}>
               <span className="topic-copy">
@@ -318,14 +510,14 @@ export default function App() {
         })}
       </nav>
       <div className="sidebar-note">
-        <CatMascot />
+        <CatMascot themeId={previewTheme} />
         <p><strong>Сначала понять,</strong><br />потом ускоряться.</p>
       </div>
     </>
   )
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-theme={previewTheme}>
       <aside className="sidebar desktop-sidebar">
         <Brand />
         {navigation}
@@ -334,7 +526,16 @@ export default function App() {
 
       <header className="mobile-header">
         <Brand />
-        <button type="button" className="menu-button" onClick={() => setMenuOpen(true)} aria-label="Открыть темы"><Menu size={22} /><span>Темы</span></button>
+        <div className="mobile-actions">
+          <button type="button" className="menu-button" onClick={() => {
+            setView(view === 'practice' ? 'theory' : 'practice')
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          }}>
+            {view === 'practice' ? <BookOpen size={19} /> : <Target size={19} />}
+            <span>{view === 'practice' ? 'Теория' : 'Тренажёр'}</span>
+          </button>
+          <button type="button" className="menu-button" onClick={() => setMenuOpen(true)} aria-label="Открыть темы"><Menu size={21} /><span>Темы</span></button>
+        </div>
       </header>
 
       {menuOpen && (
@@ -349,10 +550,54 @@ export default function App() {
 
       <main className="main-content">
         <div className="topline">
-          <div className="breadcrumbs"><span>{grade} класс</span><ChevronRight size={14} /><span>{activeTopic?.navTitle ?? 'Смешанная'}</span></div>
+          <div className="breadcrumbs"><span>{grade} класс</span><ChevronRight size={14} /><span>{view === 'theory' ? 'Теория и формулы' : view === 'workshop' ? 'Мастерская' : view === 'competition' ? 'Сетевая арена' : activeTopic?.navTitle ?? 'Смешанная'}</span></div>
           <div className="streak"><Target size={17} /><span>Серия</span><strong>{progress.streak}</strong></div>
         </div>
 
+        <RewardBar
+          themeId={previewTheme}
+          plusBalance={plusBalance}
+          sparkBalance={sparkBalance}
+          trophies={trophies}
+          authenticated={isAuthenticated}
+          syncLabel={syncLabel}
+          onWorkshop={openWorkshop}
+          onCompetition={openCompetition}
+          onAccount={() => setAccountOpen(true)}
+        />
+
+        {view === 'competition' ? (
+          <CompetitionPage
+            key={user?.id ?? 'guest'}
+            authenticated={isAuthenticated}
+            currentUserId={user?.id ?? null}
+            isAdmin={user?.role === 'admin'}
+            grade={grade}
+            sparkBalance={sparkBalance}
+            trophies={trophies}
+            sparkEvents={sparkEvents}
+            onLogin={() => setAccountOpen(true)}
+          />
+        ) : view === 'workshop' ? (
+          <Workshop
+            selectedTheme={isAuthenticated ? cloud?.selectedTheme ?? 'classic' : 'classic'}
+            previewTheme={previewTheme}
+            plusBalance={plusBalance}
+            sparkBalance={sparkBalance}
+            purchasedThemeIds={purchasedThemeIds}
+            authenticated={isAuthenticated}
+            busyTheme={busyTheme}
+            error={workshopError}
+            onPreview={setPreviewTheme}
+            onPurchase={handlePurchase}
+            onSelect={handleSelectTheme}
+            onResetPreview={() => setPreviewTheme(isAuthenticated ? cloud?.selectedTheme ?? 'classic' : 'classic')}
+            onLogin={() => setAccountOpen(true)}
+          />
+        ) : view === 'theory' ? (
+          <TheoryPage grade={grade} onGradeChange={selectGrade} onPractice={startPractice} />
+        ) : (
+          <>
         <section className="topic-heading">
           <div>
             <div className="eyebrow">Учебный маршрут · {grade} класс</div>
@@ -370,7 +615,11 @@ export default function App() {
             ) : (
               <div className="mastery-number"><strong>{remaining}</strong><span>{taskWord(remaining)} минимум</span></div>
             )}
-            <p>{masteryComplete ? 'Можно закрепить результат или перейти к следующей теме.' : 'Если дальше решать с первой попытки и без подсказок.'}</p>
+            <p>{masteryComplete
+              ? 'Можно закрепить результат или перейти к следующей теме.'
+              : difficulty === 'easy'
+                ? 'Разминка не засчитывается. Для зачёта выбери «Уверенно» или «Сложно».'
+                : 'Если дальше решать с первой попытки и без подсказок.'}</p>
           </div>
           <div className="mastery-criteria">
             {activeTopic ? (
@@ -472,7 +721,7 @@ export default function App() {
               </>
             ) : (
               <div className="session-summary">
-                <div className="summary-mascot"><CatMascot happy /></div>
+                <div className="summary-mascot"><CatMascot themeId={previewTheme} happy /></div>
                 <div className="summary-kicker">Серия завершена</div>
                 <h2>{sessionCorrect === sessionLength ? 'Чистая работа!' : sessionCorrect >= sessionLength * 0.7 ? 'Уверенный результат!' : 'Хорошая тренировка!'}</h2>
                 <p>{sessionCorrect === sessionLength ? 'Каждое задание решено самостоятельно и с первой попытки.' : 'Ошибки — это подсказки, что повторить в следующий раз.'}</p>
@@ -488,7 +737,7 @@ export default function App() {
               <h2>Как получить зачёт</h2>
               <div><strong>{TOPIC_TASK_GOAL}</strong><span>решённых заданий<br />в каждой теме</span></div>
               <div><strong>{TOPIC_ACCURACY_GOAL}%</strong><span>ответов с первого раза<br />и без подсказок</span></div>
-              <p>В смешанной тренировке ответ тоже засчитывается в тему задания.</p>
+              <p>Зачёт идёт только на уровнях «Уверенно» и «Сложно». В смешанной тренировке ответ засчитывается в тему задания.</p>
             </section>
             <section className="rail-section session-plan">
               <div className="rail-heading"><h2>Эта серия</h2><span>{results.length}/{sessionLength}</span></div>
@@ -508,9 +757,21 @@ export default function App() {
             </section>
           </aside>
         </div>
+          </>
+        )}
 
-        <footer className="app-footer"><span>Прогресс сохраняется только в этом браузере.</span><span>48 тем · новые форматы · 4–9 классы</span></footer>
+        <footer className="app-footer"><span>{isAuthenticated ? 'Прогресс, плюсики, искры, кубки и оформления сохраняются в аккаунте.' : 'Без аккаунта прогресс сохраняется только в этом браузере. Для арены нужен вход.'}</span><span>48 тренировок · 18 уроков · сетевая арена · 4–9 классы</span></footer>
       </main>
+      {rewardNotice && <div className="reward-toast" role="status"><Plus size={18} strokeWidth={3} />{rewardNotice}</div>}
+      {syncError && <div className="sync-error" role="alert"><span>{syncError}</span><button type="button" onClick={() => utils.progress.state.invalidate()}>Проверить снова</button></div>}
+      <AccountDialog
+        open={accountOpen}
+        user={user}
+        grade={grade}
+        onClose={() => setAccountOpen(false)}
+        onAuthenticated={handleAuthenticated}
+        onLogout={handleLogout}
+      />
     </div>
   )
 }
