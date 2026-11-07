@@ -18,7 +18,8 @@ COPY package.json ./
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/db/migrations ./db/migrations
 
-USER node
 EXPOSE 3000
 
-CMD ["sh", "-c", "node dist/migrate.js && node dist/boot.js"]
+# Start as root to prepare the mounted volume (Railway mounts /data owned by root),
+# then drop privileges to the node user before running the app.
+CMD ["sh", "-c", "mkdir -p \"${UPLOAD_DIR:-/tmp/schitalka-uploads}\" && chown -R node:node /data 2>/dev/null || true; exec su -s /bin/sh node -c 'node dist/migrate.js && node dist/boot.js'"]
