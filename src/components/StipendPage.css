@@ -1,0 +1,405 @@
+.stipend-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.stipend-panel,
+.stipend-login {
+  background: var(--panel, #fff);
+  border: 1px solid var(--line, #e5e1da);
+  border-radius: 20px;
+  padding: 22px;
+}
+
+.stipend-login {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 24px;
+}
+
+.stipend-loading {
+  padding: 40px;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.stipend-error,
+.stipend-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 14px;
+  padding: 12px 16px;
+}
+
+.stipend-error {
+  background: #fdecec;
+  color: #a32020;
+  border: 1px solid #f3c2c2;
+}
+
+.stipend-notice {
+  background: #e9f8ee;
+  color: #1d7a34;
+  border: 1px solid #bfe8cb;
+}
+
+.stipend-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.stipend-hero h1 {
+  margin: 4px 0 8px;
+}
+
+.stipend-hero p {
+  max-width: 52ch;
+  opacity: 0.8;
+  margin: 0;
+}
+
+.piggy-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 220px;
+  padding: 20px 28px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #fff4d6, #ffe3ec);
+  border: 1px solid #f2d8a7;
+}
+
+.piggy-card strong {
+  font-size: 34px;
+  line-height: 1;
+}
+
+.piggy-card span {
+  font-size: 13px;
+  opacity: 0.75;
+  text-align: center;
+}
+
+.stipend-panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+
+.stipend-hint {
+  opacity: 0.75;
+  margin: 0 0 14px;
+}
+
+.goal-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.goal-emoji {
+  font-size: 44px;
+}
+
+.goal-info {
+  flex: 1;
+  min-width: 240px;
+}
+
+.goal-info h2 {
+  margin: 2px 0 10px;
+}
+
+.goal-track {
+  height: 12px;
+  border-radius: 999px;
+  background: var(--line, #e5e1da);
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.goal-track span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ffb340, #ff6b9d);
+  transition: width 0.6s ease;
+}
+
+.prize-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.prize-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid var(--line, #e5e1da);
+  border-radius: 16px;
+  padding: 14px;
+  background: var(--panel-soft, #faf9f7);
+}
+
+.prize-card.is-goal {
+  border-color: #ff9f43;
+  box-shadow: 0 0 0 2px rgba(255, 159, 67, 0.25);
+}
+
+.prize-emoji {
+  font-size: 30px;
+}
+
+.prize-category {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.6;
+}
+
+.prize-card h3 {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.35;
+  flex: 1;
+}
+
+.prize-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.prize-goal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #d97b00;
+}
+
+.prize-claim-button {
+  margin-top: 8px;
+  justify-content: center;
+}
+
+.ghost-button {
+  border: 1px solid var(--line, #d8d4cc);
+  background: transparent;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.ghost-button:hover:not(:disabled) {
+  border-color: #ff9f43;
+  color: #d97b00;
+}
+
+.ghost-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.stipend-rules {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stipend-events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stipend-events li {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  border-bottom: 1px dashed var(--line, #e5e1da);
+  padding-bottom: 8px;
+}
+
+.stipend-events li:last-child {
+  border-bottom: none;
+}
+
+.stipend-events strong {
+  min-width: 70px;
+  text-align: right;
+}
+
+.event-plus {
+  color: #1d7a34;
+}
+
+.event-minus {
+  color: #a32020;
+}
+
+.stipend-events span {
+  flex: 1;
+}
+
+.stipend-events time {
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+.claim-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.claim-steps li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line, #e5e1da);
+  font-size: 14px;
+}
+
+.claim-steps li.done {
+  background: #e9f8ee;
+  border-color: #bfe8cb;
+  color: #1d7a34;
+}
+
+.claim-steps li.current {
+  background: #fff4d6;
+  border-color: #f2d8a7;
+  font-weight: 600;
+}
+
+.claim-steps li.todo {
+  opacity: 0.55;
+}
+
+.claim-step-icon {
+  display: inline-flex;
+}
+
+/* --- teacher tab --- */
+
+.stipend-teacher {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.budget-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.budget-card {
+  border: 1px solid var(--line, #e5e1da);
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.budget-card strong {
+  font-size: 24px;
+}
+
+.budget-card span {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.stipend-form {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.stipend-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.stipend-form input,
+.stipend-form select {
+  border: 1px solid var(--line, #d8d4cc);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font: inherit;
+  min-width: 110px;
+}
+
+.stipend-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.stipend-table th,
+.stipend-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line, #e5e1da);
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.stipend-table th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.6;
+}
+
+.claim-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.claim-status {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.claim-status.requested { background: #fff4d6; color: #a86a00; }
+.claim-status.approved { background: #e8f0fe; color: #2456b8; }
+.claim-status.ordered { background: #efe8fd; color: #6a3ec9; }
+.claim-status.delivered { background: #e9f8ee; color: #1d7a34; }
+.claim-status.cancelled { background: #f1efec; color: #777; }
