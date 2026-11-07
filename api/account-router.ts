@@ -6,7 +6,7 @@ import { Session } from "@contracts/constants";
 import { studentStats, users } from "@db/schema";
 import { getDb } from "./queries/connection";
 import { ensureStudentStats, findStudentUser } from "./queries/learning";
-import { createRouter, publicQuery } from "./middleware";
+import { authedQuery, createRouter, publicQuery } from "./middleware";
 import { env } from "./lib/env";
 import { getSessionCookieOptions } from "./lib/cookies";
 import { signSessionToken } from "./kimi/session";
@@ -39,8 +39,8 @@ function noteLoginFailure(key: string) {
   });
 }
 
-async function createSession(ctx: { req: Request; resHeaders: Headers }, unionId: string) {
-  const token = await signSessionToken({ unionId, clientId: env.appId });
+async function createSession(ctx: { req: Request; resHeaders: Headers }, unionId: string, sessionVersion = 0) {
+  const token = await signSessionToken({ unionId, clientId: env.appId, sessionVersion });
   const options = getSessionCookieOptions(ctx.req.headers);
   ctx.resHeaders.append("set-cookie", cookie.serialize(Session.cookieName, token, {
     httpOnly: options.httpOnly,
@@ -57,6 +57,7 @@ export const accountRouter = createRouter({
     name: ctx.user.name,
     email: ctx.user.email,
     role: ctx.user.role,
+    mustChangePassword: ctx.user.mustChangePassword,
     lastSignInAt: ctx.user.lastSignInAt,
   } : null),
 
@@ -89,7 +90,7 @@ export const accountRouter = createRouter({
       }
       throw error;
     }
-    await createSession(ctx, unionId);
+    await createSession(ctx, unionId, 0);
     return { id: userId, name: input.login.trim() };
   }),
 
@@ -107,7 +108,29 @@ export const accountRouter = createRouter({
       loginAttempts.delete(key);
       await getDb().update(users).set({ lastSignInAt: new Date() }).where(eq(users.id, user.id));
       await ensureStudentStats(user.id);
-      await createSession(ctx, unionId);
-      return { id: user.id, name: user.name };
+      await createSession(ctx, unionId, user.sessionVersion);
+      return { id: user.id, name: user.name, mustChangePassword: user.mustChangePassword };
     }),
+
+  changePassword: authedQuery.input(z.object({
+    currentPassword: z.string().min(1).max(72),
+    newPassword: passwordSchema,
+  })).mutation(async ({ ctx, input }) => {
+    if (!ctx.user.passwordHash || !(await verifyPassword(input.currentPassword, ctx.user.passwordHash))) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "Текущий пароль указан неверно" });
+    }
+    if (input.currentPassword === input.newPassword) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Новый пароль должен отличаться от временного" });
+    }
+    const passwordHash = await hashPassword(input.newPassword);
+    const sessionVersion = ctx.user.sessionVersion + 1;
+    await getDb().update(users).set({
+      passwordHash,
+      mustChangePassword: false,
+      sessionVersion,
+      updatedAt: new Date(),
+    }).where(eq(users.id, ctx.user.id));
+    await createSession(ctx, ctx.user.unionId, sessionVersion);
+    return { ok: true as const };
+  }),
 });

@@ -17,7 +17,6 @@ async function exchangeAuthCode(
 ): Promise<TokenResponse> {
   const body = new URLSearchParams({
     grant_type: "authorization_code",
-    code,
     client_id: env.appId,
     redirect_uri: redirectUri,
     client_secret: env.appSecret,
@@ -68,6 +67,9 @@ export async function authenticateRequest(headers: Headers) {
   if (!user) {
     throw Errors.forbidden("User not found. Please re-login.");
   }
+  if ((claim.sessionVersion ?? 0) !== user.sessionVersion) {
+    throw Errors.forbidden("Session expired. Please re-login.");
+  }
   return user;
 }
 
@@ -108,9 +110,11 @@ export function createOAuthCallbackHandler() {
         lastSignInAt: new Date(),
       });
 
+      const sessionUser = await findUserByUnionId(userId);
       const token = await signSessionToken({
         unionId: userId,
         clientId: env.appId,
+        sessionVersion: sessionUser?.sessionVersion ?? 0,
       });
 
       const cookieOpts = getSessionCookieOptions(c.req.raw.headers);
