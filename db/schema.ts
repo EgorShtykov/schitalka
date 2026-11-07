@@ -212,6 +212,7 @@ export const trophies = mysqlTable(
       .notNull()
       .references(() => users.id),
     roomId: varchar("roomId", { length: 36 })
+      .notNull()
       .references(() => competitionRooms.id),
     place: int("place").notNull(),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
