@@ -85,7 +85,7 @@ export const absoluteValues = (difficulty: Difficulty) => {
   }
   const a = randInt(-25 - l * 20, -2), b = randInt(3, 18 + l * 10)
   if (l === 0) return problem(`|${signed(a)}| + |${b}|`, Math.abs(a) + b, [`|${signed(a)}| = ${Math.abs(a)}; |${b}| = ${b}.`, `${Math.abs(a)} + ${b} = ${Math.abs(a) + b}.`], 'Модуль числа — расстояние до нуля, поэтому он всегда неотрицателен.')
-  return problem(`|${signed(a)} × ${b}| − |${signed(a)}|`, Math.abs(a * b) - Math.abs(a), [`1) |${signed(a)} × ${b}| = ${Math.abs(a * b)}; |${signed(a)}| = ${Math.abs(a)}.`, `2) ${Math.abs(a * b)} − ${Math.abs(a)} = ${Math.abs(a * b) - Math.abs(a)}.`], 'Сначала вычисли выражение внутри модуля, затем уберите знак модуля.')
+  return problem(`|${signed(a)} × ${b}| − |${signed(a)}|`, Math.abs(a * b) - Math.abs(a), [`1) |${signed(a)} × ${b}| = ${Math.abs(a * b)}; |${signed(a)}| = ${Math.abs(a)}.`, `2) ${Math.abs(a * b)} − ${Math.abs(a)} = ${Math.abs(a * b) - Math.abs(a)}.`], 'Сначала вычисли выражение внутри модуля, затем убери знак модуля.')
 }
 
 export const percentProblems = (difficulty: Difficulty) => {
@@ -122,17 +122,23 @@ export const identities = (difficulty: Difficulty) => {
   return problem(`${base}²`, base * base, [`Представь ${base} как ${reference} ${delta < 0 ? '−' : '+'} ${Math.abs(delta)}.`, `(${reference} ${delta < 0 ? '−' : '+'} ${Math.abs(delta)})² = ${reference ** 2} ${2 * reference * delta < 0 ? '−' : '+'} ${Math.abs(2 * reference * delta)} + ${delta ** 2} = ${base * base}.`], 'Ближайшее круглое число и квадрат суммы или разности помогают считать устно.', { instruction: 'Вычисли удобным способом' })
 }
 
+const POWER_COMBINATION_LIMIT = 4096
+
 export const powerCombinations = (difficulty: Difficulty) => {
   const l = level(difficulty)
-  const base = pick(l === 2 ? [2, 3, 5] : [2, 3, 4, 5])
+  const candidates = l === 2 ? [2, 3, 5] : [2, 3, 4, 5]
   const a = randInt(2, 4), b = randInt(1, 3), c = randInt(1, Math.min(a + b - 1, 3))
   if (l === 0) {
+    const base = pick(candidates.filter((value) => value ** (a + b) <= POWER_COMBINATION_LIMIT))
     return problem(`${base}${sup(a)} × ${base}${sup(b)}`, base ** (a + b), [`Показатели складываем: ${a} + ${b} = ${a + b}.`, `${base}${sup(a + b)} = ${base ** (a + b)}.`], 'Одинаковое основание позволяет сложить показатели вместо длинного умножения.', { instruction: 'Вычисли результат' })
   }
   if (l === 1) {
+    const base = pick(candidates.filter((value) => value ** (a + b) <= POWER_COMBINATION_LIMIT))
     return problem(`${base}${sup(a)} × ${base}${sup(b)} : ${base}${sup(c)}`, base ** (a + b - c), [`Суммарный показатель: ${a} + ${b} − ${c} = ${a + b - c}.`, `${base}${sup(a + b - c)} = ${base ** (a + b - c)}.`], 'При умножении показатели складываются, при делении — вычитаются.', { instruction: 'Вычисли результат' })
   }
-  const n = randInt(2, 4), answer = base ** n + base ** (n - 1)
+  const n = randInt(2, 4)
+  const base = pick(candidates.filter((value) => value ** n + value ** (n - 1) <= POWER_COMBINATION_LIMIT))
+  const answer = base ** n + base ** (n - 1)
   return problem(`${base}${sup(n)} + ${base}${sup(n - 1)}`, answer, [`Вынеси ${base}${sup(n - 1)}: ${base}${sup(n - 1)} × (${base} + 1).`, `${base ** (n - 1)} × ${base + 1} = ${answer}.`], 'Общий множитель с меньшим показателем помогает упростить сумму степеней.', { instruction: 'Вычисли через общий множитель' })
 }
 
