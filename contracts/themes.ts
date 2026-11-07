@@ -1,0 +1,111 @@
+export const themes = [
+  {
+    id: "classic",
+    name: "Классика",
+    shortName: "Классика",
+    price: 0,
+    currency: "plus",
+    tagline: "Знакомая мятная тетрадь",
+    description: "Тёплая бумага, зелёные чернила и спокойный кот-наблюдатель.",
+    accessory: "Без аксессуара",
+    swatches: ["#edf5e9", "#fff8ef", "#003933", "#d1410f"],
+  },
+  {
+    id: "sakura-neon",
+    name: "Сакура//Неон",
+    shortName: "Сакура//Неон",
+    price: 3,
+    currency: "plus",
+    tagline: "Ночной город и розовый сигнал",
+    description: "Тёмная вишня, розовые акценты и кот в наушниках.",
+    accessory: "Розовые наушники",
+    swatches: ["#160d1b", "#2b1530", "#ff73bf", "#ffd3e8"],
+  },
+  {
+    id: "noir",
+    name: "NOIR · Чёрная тетрадь",
+    shortName: "NOIR",
+    price: 4,
+    currency: "plus",
+    tagline: "Графит, крем и лаймовая пометка",
+    description: "Контрастная тетрадь с кремовыми карточками и жёлто-зелёными отметками.",
+    accessory: "Чёрные очки",
+    swatches: ["#181916", "#fff6dc", "#282b23", "#a2b84d"],
+  },
+  {
+    id: "mint-comic",
+    name: "Мятный комикс",
+    shortName: "Мятный комикс",
+    price: 2,
+    currency: "plus",
+    tagline: "Понятно — и с характером!",
+    description: "Светлая мята, рукописные подписи, наклейки и живой контур.",
+    accessory: "Звёздная наклейка",
+    swatches: ["#dff8e9", "#fffdf2", "#173f3b", "#ff8f70"],
+  },
+  {
+    id: "cosmic",
+    name: "Космический разряд",
+    shortName: "Космос",
+    price: 5,
+    currency: "plus",
+    tagline: "Орбита знаний",
+    description: "Тёмно-синяя орбита, золотые отметки и кот в шлеме.",
+    accessory: "Космический шлем",
+    swatches: ["#0d1230", "#23204d", "#ffbf2e", "#a1d9f7"],
+  },
+  {
+    id: "peach-rhythm",
+    name: "Персиковый ритм",
+    shortName: "Персиковый ритм",
+    price: 3,
+    currency: "plus",
+    tagline: "Тёплый темп без спешки",
+    description: "Кремовый фон, персиковые панели и коралловые кнопки.",
+    accessory: "Коралловый бант",
+    swatches: ["#fff4e8", "#ffd6bc", "#71392f", "#f2765b"],
+  },
+  {
+    id: "lime-arena",
+    name: "LIME//Арена",
+    shortName: "LIME//Арена",
+    price: 6,
+    currency: "spark",
+    tagline: "Чёткий сигнал и скорость без суеты",
+    description: "Тёплый белый, тёмный оливковый борт, лаймовые кнопки и стикеры-победители.",
+    accessory: "Лаймовый визор",
+    swatches: ["#fffff7", "#efffc5", "#1c1616", "#cdfb52"],
+  },
+  {
+    id: "coral-overdrive",
+    name: "CORAL//Разряд",
+    shortName: "CORAL//Разряд",
+    price: 8,
+    currency: "spark",
+    tagline: "Чёткая сетка ночного турнира",
+    description: "Чернила, светлые рабочие карточки и один коралловый акцент чемпионской трассы.",
+    accessory: "Коралловая корона",
+    swatches: ["#171516", "#f7f5f2", "#1c1616", "#f8473d"],
+  },
+  {
+    id: "sticker-pop",
+    name: "STICKER//Поп",
+    shortName: "STICKER//Поп",
+    price: 10,
+    currency: "spark",
+    tagline: "Аркадная коллекция ярких побед",
+    description: "Розовый, холодный голубой и объёмные кнопки-стикеры на чистом игровом поле.",
+    accessory: "Звёздный бейдж",
+    swatches: ["#fff7fd", "#e8f7ff", "#1c1616", "#ff7ad9"],
+  },
+] as const;
+
+export type ThemeId = (typeof themes)[number]["id"];
+
+export function isThemeId(value: string): value is ThemeId {
+  return themes.some((theme) => theme.id === value);
+}
+
+export function getTheme(value: string) {
+  return themes.find((theme) => theme.id === value) ?? themes[0];
+}
