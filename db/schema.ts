@@ -20,6 +20,8 @@ export const users = mysqlTable("users", {
   email: varchar("email", { length: 320 }),
   avatar: text("avatar"),
   passwordHash: varchar("passwordHash", { length: 255 }),
+  mustChangePassword: boolean("mustChangePassword").default(false).notNull(),
+  sessionVersion: int("sessionVersion").default(0).notNull(),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt")
@@ -217,6 +219,152 @@ export const trophies = mysqlTable(
   },
   (table) => ({
     uniqueEntry: unique("trophies_unique_entry").on(table.userId, table.roomId),
+  }),
+);
+
+export const classes = mysqlTable(
+  "classes",
+  {
+    id: serial("id").primaryKey(),
+    teacherId: bigint("teacherId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => users.id),
+    name: varchar("name", { length: 40 }).notNull(),
+    grade: int("grade").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    uniqueTeacherClass: unique("classes_teacher_name_unique").on(table.teacherId, table.name),
+    teacherIdx: index("classes_teacher_idx").on(table.teacherId),
+  }),
+);
+
+export const classMembers = mysqlTable(
+  "class_members",
+  {
+    classId: bigint("classId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => classes.id),
+    studentId: bigint("studentId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.classId, table.studentId] }),
+    studentIdx: index("class_members_student_idx").on(table.studentId),
+  }),
+);
+
+export const homeworkAssignments = mysqlTable(
+  "homework_assignments",
+  {
+    id: serial("id").primaryKey(),
+    teacherId: bigint("teacherId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => users.id),
+    classId: bigint("classId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => classes.id),
+    title: varchar("title", { length: 120 }).notNull(),
+    description: text("description").notNull(),
+    dueAt: timestamp("dueAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    classIdx: index("homework_assignments_class_idx").on(table.classId),
+    teacherIdx: index("homework_assignments_teacher_idx").on(table.teacherId),
+  }),
+);
+
+export const homeworkSubmissions = mysqlTable(
+  "homework_submissions",
+  {
+    id: serial("id").primaryKey(),
+    assignmentId: bigint("assignmentId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => homeworkAssignments.id),
+    studentId: bigint("studentId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => users.id),
+    textAnswer: text("textAnswer"),
+    status: mysqlEnum("status", ["submitted", "reviewed", "needs_revision"]).default("submitted").notNull(),
+    teacherComment: text("teacherComment"),
+    aiStatus: mysqlEnum("aiStatus", ["idle", "processing", "completed", "failed"]).default("idle").notNull(),
+    aiReport: text("aiReport"),
+    aiConfidence: int("aiConfidence"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt")
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    uniqueSubmission: unique("homework_submission_assignment_student_unique").on(table.assignmentId, table.studentId),
+    studentIdx: index("homework_submissions_student_idx").on(table.studentId),
+    assignmentIdx: index("homework_submissions_assignment_idx").on(table.assignmentId),
+  }),
+);
+
+export const homeworkFiles = mysqlTable(
+  "homework_files",
+  {
+    id: varchar("id", { length: 36 }).primaryKey(),
+    submissionId: bigint("submissionId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => homeworkSubmissions.id),
+    storageName: varchar("storageName", { length: 255 }).notNull().unique(),
+    originalName: varchar("originalName", { length: 255 }).notNull(),
+    contentType: varchar("contentType", { length: 40 }).notNull(),
+    size: int("size").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    submissionIdx: index("homework_files_submission_idx").on(table.submissionId),
+  }),
+);
+
+export const gradeEntries = mysqlTable(
+  "grade_entries",
+  {
+    id: serial("id").primaryKey(),
+    teacherId: bigint("teacherId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => users.id),
+    studentId: bigint("studentId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => users.id),
+    classId: bigint("classId", { mode: "number", unsigned: true })
+      .references(() => classes.id),
+    submissionId: bigint("submissionId", { mode: "number", unsigned: true })
+      .references(() => homeworkSubmissions.id),
+    grade: int("grade").notNull(),
+    comment: varchar("comment", { length: 255 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    uniqueSubmissionGrade: unique("grade_entries_submission_unique").on(table.submissionId),
+    studentIdx: index("grade_entries_student_idx").on(table.studentId),
+    teacherIdx: index("grade_entries_teacher_idx").on(table.teacherId),
+  }),
+);
+
+export const aiChecks = mysqlTable(
+  "ai_checks",
+  {
+    id: serial("id").primaryKey(),
+    submissionId: bigint("submissionId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => homeworkSubmissions.id),
+    teacherId: bigint("teacherId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => users.id),
+    status: mysqlEnum("status", ["completed", "failed"]).notNull(),
+    errorMessage: varchar("errorMessage", { length: 255 }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    teacherCreatedIdx: index("ai_checks_teacher_created_idx").on(table.teacherId, table.createdAt),
   }),
 );
 
