@@ -19,8 +19,8 @@ const app = new Hono<{ Bindings: HttpBindings }>();
 //   - G3 correlation: mint a request id, echo it on the response header (what the
 //     browser logger reads), and run the rest of the request inside it so every
 //     server log line carries it.
-//   - G4 access log: one log line per request with method/path/status/duration, so
-//     "who called what and how long did it take" can be answered. Until now only
+//   - G4 access log: one line per request with method/path/status/duration, so
+//     "who called what and how long did it take" is answerable. Until now only
 //     failures were logged at all, and success left no trace.
 // /api/log is skipped: it is the browser's log sink, and an access line per
 // POSTed batch would be self-amplifying noise in the very file it writes.
