@@ -35,7 +35,7 @@ function noteLoginFailure(key: string) {
   const current = loginAttempts.get(key);
   loginAttempts.set(key, {
     count: current && current.resetAt > Date.now() ? current.count + 1 : 1,
-    resetAt: current && current.resetAt > Date.now() ? Date.now() + 5 * 60 * 1000 : Date.now() + 5 * 60 * 1000,
+    resetAt: current && current.resetAt > Date.now() ? current.resetAt : Date.now() + 5 * 60 * 1000,
   });
 }
 
