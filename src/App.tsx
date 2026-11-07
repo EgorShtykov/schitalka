@@ -12,6 +12,7 @@ import {
   Lightbulb,
   Menu,
   Palette,
+  PiggyBank,
   Plus,
   RotateCcw,
   Sparkles,
@@ -28,6 +29,7 @@ import { CompetitionPage } from "./components/CompetitionPage";
 import { MathText } from "./components/MathText";
 import { RewardBar } from "./components/RewardBar";
 import { SchoolPage } from "./components/SchoolPage";
+import { StipendPage } from "./components/StipendPage";
 import { TheoryPage } from "./components/TheoryPage";
 import { Workshop } from "./components/Workshop";
 import { answersMatch, matchingPitfall } from "./lib/math";
@@ -45,7 +47,7 @@ import { emptyProgress } from "@contracts/learning";
 
 type AnswerStatus = "idle" | "correct" | "wrong" | "revealed";
 type SessionResult = "clean" | "assisted";
-type AppView = "practice" | "theory" | "workshop" | "competition" | "school";
+type AppView = "practice" | "theory" | "workshop" | "competition" | "school" | "stipend";
 
 const grades: Grade[] = [4, 5, 6, 7, 8, 9];
 const difficultyLabels: { id: Difficulty; label: string }[] = [
@@ -640,6 +642,21 @@ export default function App() {
           <ClipboardList size={16} />
           Школа
         </button>
+        {user?.role !== "admin" && (
+          <button
+            type="button"
+            className={view === "stipend" ? "active" : ""}
+            aria-pressed={view === "stipend"}
+            onClick={() => {
+              setView("stipend");
+              setMenuOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          >
+            <PiggyBank size={16} />
+            Стипендия
+          </button>
+        )}
         <button
           type="button"
           className={view === "workshop" ? "active" : ""}
@@ -817,7 +834,9 @@ export default function App() {
                       ? user?.role === "admin"
                         ? "Учительский кабинет"
                         : "Мои домашние работы"
-                      : (activeTopic?.navTitle ?? "Смешанная")}
+                      : view === "stipend"
+                        ? "Стипендия"
+                        : (activeTopic?.navTitle ?? "Смешанная")}
             </span>
           </div>
           <div className="streak">
@@ -843,6 +862,11 @@ export default function App() {
           <SchoolPage
             authenticated={isAuthenticated}
             isAdmin={user?.role === "admin"}
+            onLogin={() => setAccountOpen(true)}
+          />
+        ) : view === "stipend" ? (
+          <StipendPage
+            authenticated={isAuthenticated}
             onLogin={() => setAccountOpen(true)}
           />
         ) : view === "competition" ? (
