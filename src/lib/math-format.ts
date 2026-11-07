@@ -163,3 +163,4 @@ export function mathToTex(source: string) {
 export function hasAdvancedNotation(text: string) {
   return /[√∛]/.test(text) || text.includes(' : ') || /[A-Za-z0-9⁰-⁹₀-₉]\/[A-Za-z0-9(]/.test(text)
 }
+

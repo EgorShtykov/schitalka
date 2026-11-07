@@ -1,3 +1,5 @@
+import { isMasteryComplete } from '@contracts/learning'
+
 export const TOPIC_TASK_GOAL = 20
 export const TOPIC_ACCURACY_GOAL = 80
 
@@ -11,12 +13,12 @@ export const emptyMasteryProgress: MasteryProgress = { solved: 0, attempts: 0, f
 
 export function getTopicMastery(progress: MasteryProgress = emptyMasteryProgress) {
   const { solved, attempts, firstTry } = progress
-  const accuracy = attempts ? Math.round(firstTry / attempts * 100) : 0
+  const accuracy = attempts ? Math.floor(firstTry / attempts * 100) : 0
   const taskRemaining = Math.max(0, TOPIC_TASK_GOAL - solved)
   const accuracyRemaining = accuracy >= TOPIC_ACCURACY_GOAL
     ? 0
     : Math.max(0, Math.ceil((TOPIC_ACCURACY_GOAL / 100 * attempts - firstTry) / (1 - TOPIC_ACCURACY_GOAL / 100) - 1e-9))
-  const complete = solved >= TOPIC_TASK_GOAL && attempts > 0 && accuracy >= TOPIC_ACCURACY_GOAL
+  const complete = isMasteryComplete({ solved, attempts, firstTry })
   const score = Math.round(complete ? 100 : Math.min(solved / TOPIC_TASK_GOAL, 1) * 70 + Math.min(accuracy / TOPIC_ACCURACY_GOAL, 1) * 30)
   return {
     solved,
