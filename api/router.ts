@@ -4,6 +4,7 @@ import { learningRouter } from "./learning-router";
 import { competitionRouter } from "./competition-router";
 import { homeworkRouter } from "./homework-router";
 import { studentSchoolRouter, teacherRouter } from "./teacher-router";
+import { stipendRouter } from "./stipend-router";
 import { createRouter, publicQuery } from "./middleware";
 
 export const appRouter = createRouter({
@@ -15,6 +16,7 @@ export const appRouter = createRouter({
   homework: homeworkRouter,
   teacher: teacherRouter,
   school: studentSchoolRouter,
+  stipend: stipendRouter,
 });
 
 export type AppRouter = typeof appRouter;
