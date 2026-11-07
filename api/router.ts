@@ -3,6 +3,7 @@ import { accountRouter } from "./account-router";
 import { learningRouter } from "./learning-router";
 import { competitionRouter } from "./competition-router";
 import { homeworkRouter } from "./homework-router";
+import { studentSchoolRouter, teacherRouter } from "./teacher-router";
 import { createRouter, publicQuery } from "./middleware";
 
 export const appRouter = createRouter({
@@ -12,6 +13,8 @@ export const appRouter = createRouter({
   progress: learningRouter,
   competition: competitionRouter,
   homework: homeworkRouter,
+  teacher: teacherRouter,
+  school: studentSchoolRouter,
 });
 
 export type AppRouter = typeof appRouter;

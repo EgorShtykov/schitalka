@@ -11,6 +11,7 @@ import { log } from "./lib/logger";
 import { handleClientLog } from "./lib/clientlog";
 import { REQUEST_ID_HEADER, runWithRequestId } from "./lib/requestcontext";
 import { getDb } from "./queries/connection";
+import { registerHomeworkFileRoutes } from "./homework-file-routes";
 
 const app = new Hono<{ Bindings: HttpBindings }>();
 
@@ -78,6 +79,7 @@ app.post(
   bodyLimit({ maxSize: 64 * 1024, onError: (c) => c.body(null, 413) }),
   handleClientLog,
 );
+registerHomeworkFileRoutes(app);
 app.get("/api/health", async (c) => {
   await getDb().query.users.findFirst({
     columns: { id: true },
