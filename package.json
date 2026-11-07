@@ -105,7 +105,7 @@
     "@hono/vite-dev-server": "^0.19.0",
     "esbuild": "^0.27.2",
     "prettier": "^3.7.4",
-    "vitest": "^4.0.16",
+    "vitest": "~4.0.16",
     "drizzle-kit": "^0.31.8"
   }
 }
