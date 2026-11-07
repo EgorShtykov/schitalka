@@ -17,6 +17,8 @@ import { getDb } from "./queries/connection";
 import { hashPassword, normalizeLogin } from "./password";
 import { adminQuery, authedQuery, createRouter } from "./middleware";
 import { getAiAvailability, runHomeworkAiCheck } from "./ai/homework-check";
+import { creditHomeworkReview } from "./queries/stipend";
+import { log } from "./lib/logger";
 
 const loginSchema = z.string().trim().min(3).max(24);
 const gradeSchema = z.number().int().min(1).max(5);
@@ -212,6 +214,18 @@ export const teacherRouter = createRouter({
         } });
       }
     });
+    if (input.status === "reviewed") {
+      // Стипендия начисляется после успешной проверки и не должна её ломать.
+      try {
+        await creditHomeworkReview(ctx.user.id, submission.id, submission.studentId);
+      } catch (error) {
+        log.error("stipend credit failed", {
+          submissionId: submission.id,
+          studentId: submission.studentId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
     return { ok: true as const };
   }),
 

@@ -212,7 +212,6 @@ export const trophies = mysqlTable(
       .notNull()
       .references(() => users.id),
     roomId: varchar("roomId", { length: 36 })
-      .notNull()
       .references(() => competitionRooms.id),
     place: int("place").notNull(),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -365,6 +364,134 @@ export const aiChecks = mysqlTable(
   },
   (table) => ({
     teacherCreatedIdx: index("ai_checks_teacher_created_idx").on(table.teacherId, table.createdAt),
+  }),
+);
+
+export const stipendPrograms = mysqlTable(
+  "stipend_programs",
+  {
+    id: serial("id").primaryKey(),
+    teacherId: bigint("teacherId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => users.id),
+    amountPerHomework: int("amountPerHomework").default(250).notNull(),
+    cycleBonus: int("cycleBonus").default(1000).notNull(),
+    cycleWeeks: int("cycleWeeks").default(4).notNull(),
+    homeworkPerWeek: int("homeworkPerWeek").default(2).notNull(),
+    active: boolean("active").default(true).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt")
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    uniqueTeacher: unique("stipend_programs_teacher_unique").on(table.teacherId),
+  }),
+);
+
+export const stipendCycles = mysqlTable(
+  "stipend_cycles",
+  {
+    id: serial("id").primaryKey(),
+    studentId: bigint("studentId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => users.id),
+    startsAt: timestamp("startsAt").notNull(),
+    endsAt: timestamp("endsAt").notNull(),
+    balance: int("balance").default(0).notNull(),
+    homeworkCount: int("homeworkCount").default(0).notNull(),
+    bonusGranted: boolean("bonusGranted").default(false).notNull(),
+    status: mysqlEnum("status", ["active", "completed"]).default("active").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    studentStatusIdx: index("stipend_cycles_student_status_idx").on(table.studentId, table.status),
+  }),
+);
+
+export const stipendEvents = mysqlTable(
+  "stipend_events",
+  {
+    id: serial("id").primaryKey(),
+    cycleId: bigint("cycleId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => stipendCycles.id),
+    studentId: bigint("studentId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => users.id),
+    kind: mysqlEnum("kind", ["homework_credit", "cycle_bonus", "prize_debit", "refund"]).notNull(),
+    refId: varchar("refId", { length: 100 }).notNull(),
+    amount: int("amount").notNull(),
+    note: varchar("note", { length: 255 }),
+    createdBy: bigint("createdBy", { mode: "number", unsigned: true })
+      .references(() => users.id),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    uniqueEntry: unique("stipend_events_unique_entry").on(table.studentId, table.kind, table.refId),
+    cycleIdx: index("stipend_events_cycle_idx").on(table.cycleId),
+  }),
+);
+
+export const prizes = mysqlTable(
+  "prizes",
+  {
+    id: serial("id").primaryKey(),
+    teacherId: bigint("teacherId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => users.id),
+    title: varchar("title", { length: 120 }).notNull(),
+    category: varchar("category", { length: 40 }).default("Разное").notNull(),
+    emoji: varchar("emoji", { length: 8 }).default("🎁").notNull(),
+    price: int("price").notNull(),
+    active: boolean("active").default(true).notNull(),
+    sortOrder: int("sortOrder").default(0).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    teacherIdx: index("prizes_teacher_idx").on(table.teacherId),
+  }),
+);
+
+export const prizeGoals = mysqlTable("prize_goals", {
+  studentId: bigint("studentId", { mode: "number", unsigned: true })
+    .primaryKey()
+    .references(() => users.id),
+  prizeId: bigint("prizeId", { mode: "number", unsigned: true })
+    .notNull()
+    .references(() => prizes.id),
+  chosenAt: timestamp("chosenAt").defaultNow().notNull(),
+});
+
+export const prizeClaims = mysqlTable(
+  "prize_claims",
+  {
+    id: serial("id").primaryKey(),
+    studentId: bigint("studentId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => users.id),
+    prizeId: bigint("prizeId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => prizes.id),
+    cycleId: bigint("cycleId", { mode: "number", unsigned: true })
+      .notNull()
+      .references(() => stipendCycles.id),
+    title: varchar("title", { length: 120 }).notNull(),
+    priceSnapshot: int("priceSnapshot").notNull(),
+    actualPrice: int("actualPrice"),
+    status: mysqlEnum("status", ["requested", "approved", "ordered", "delivered", "cancelled"])
+      .default("requested")
+      .notNull(),
+    note: varchar("note", { length: 255 }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt")
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    studentIdx: index("prize_claims_student_idx").on(table.studentId),
   }),
 );
 
