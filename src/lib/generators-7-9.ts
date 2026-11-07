@@ -3,10 +3,17 @@ import type { Difficulty, Topic } from './math'
 
 const level = (difficulty: Difficulty) => difficulty === 'easy' ? 0 : difficulty === 'medium' ? 1 : 2
 
+const POWER_ANSWER_LIMIT = 4096
+
 export const powersSeven = (difficulty: Difficulty) => {
   const l = level(difficulty)
-  const base = l === 0 ? randInt(2, 10) : l === 1 ? randInt(-9, 12) || -3 : pick([0.2, 0.5, 1.5, -2, -3, 4])
   const exponent = l === 0 ? pick([2, 3]) : pick([2, 3, 4])
+  const candidates = l === 0
+    ? Array.from({ length: 9 }, (_, index) => index + 2)
+    : l === 1
+      ? Array.from({ length: 22 }, (_, index) => index - 9).filter((value) => value !== 0)
+      : [0.2, 0.5, 1.5, -2, -3, 4]
+  const base = pick(candidates.filter((value) => Math.abs(value ** exponent) <= POWER_ANSWER_LIMIT))
   const answer = base ** exponent
   const factors = Array.from({ length: exponent }, () => parenthesize(base)).join(' × ')
   return problem(`${parenthesize(base)}${sup(exponent)}`, answer, [`Степень — это повторное умножение: ${fmt(base)}${sup(exponent)} = ${factors}.`, `Результат: ${fmt(answer)}.`], 'Показатель степени показывает, сколько раз основание умножается само на себя. Сначала возведи в степень, затем учитывай знак.')
@@ -14,19 +21,22 @@ export const powersSeven = (difficulty: Difficulty) => {
 
 export const powerProperties = (difficulty: Difficulty) => {
   const l = level(difficulty)
-  const base = randInt(2, l === 2 ? 5 : 8)
+  const candidates = Array.from({ length: l === 2 ? 4 : 7 }, (_, index) => index + 2)
   const kind = pick(l === 0 ? ['multiply', 'divide'] : ['multiply', 'divide', 'power'])
   if (kind === 'multiply') {
     const m = randInt(1, 3), n = randInt(1, 3)
+    const base = pick(candidates.filter((value) => value ** (m + n) <= POWER_ANSWER_LIMIT))
     const answer = base ** (m + n)
     return problem(`${base}${sup(m)} × ${base}${sup(n)}`, answer, [`Основания одинаковые, показатели складываем: ${m} + ${n} = ${m + n}.`, `${base}${sup(m + n)} = ${fmt(answer)}.`], 'При умножении степеней с одинаковым основанием показатели складываются: aᵐ · aⁿ = aᵐ⁺ⁿ.')
   }
   if (kind === 'divide') {
     const n = randInt(1, 2), m = n + randInt(1, 3)
+    const base = pick(candidates.filter((value) => value ** m <= POWER_ANSWER_LIMIT))
     const answer = base ** (m - n)
     return problem(`${base}${sup(m)} : ${base}${sup(n)}`, answer, [`Основания одинаковые, показатели вычитаем: ${m} − ${n} = ${m - n}.`, `${base}${sup(m - n)} = ${fmt(answer)}.`], 'При делении степеней с одинаковым основанием показатели вычитаются: aᵐ : aⁿ = aᵐ⁻ⁿ.')
   }
   const m = randInt(2, 3), n = randInt(2, 3)
+  const base = pick(candidates.filter((value) => value ** (m * n) <= POWER_ANSWER_LIMIT))
   const answer = base ** (m * n)
   return problem(`(${base}${sup(m)})${sup(n)}`, answer, [`При возведении степени в степень показатели перемножаются: ${m} × ${n} = ${m * n}.`, `${base}${sup(m * n)} = ${fmt(answer)}.`], 'При возведении степени в степень показатели перемножаются: (aᵐ)ⁿ = aᵐⁿ.')
 }
