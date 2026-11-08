@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   BookOpen,
@@ -14,6 +14,7 @@ import {
   Palette,
   PiggyBank,
   Plus,
+  Rocket,
   RotateCcw,
   Sparkles,
   Swords,
@@ -43,11 +44,16 @@ import {
 import { createProblem, topicsForGrade } from "./lib/topics";
 import { trpc } from "./providers/trpc";
 import type { CloudState, ProgressState, TopicId } from "@contracts/learning";
-import { emptyProgress } from "@contracts/learning";
+import { emptyProgress, topicIds } from "@contracts/learning";
+import type { WorldInput } from "./world/worldData";
+
+const WorldPage = lazy(() =>
+  import("./components/WorldPage").then((module) => ({ default: module.WorldPage }))
+);
 
 type AnswerStatus = "idle" | "correct" | "wrong" | "revealed";
 type SessionResult = "clean" | "assisted";
-type AppView = "practice" | "theory" | "workshop" | "competition" | "school" | "stipend";
+type AppView = "practice" | "theory" | "workshop" | "competition" | "school" | "stipend" | "world";
 
 const grades: Grade[] = [4, 5, 6, 7, 8, 9];
 const difficultyLabels: { id: Difficulty; label: string }[] = [
@@ -202,6 +208,18 @@ export default function App() {
   const purchasedThemeIds = isAuthenticated
     ? (cloud?.purchasedThemeIds ?? [])
     : [];
+  const worldInput: WorldInput = {
+    seed: user ? (user.id * 2654435761) % 2147483647 : 7,
+    planetName: user?.name?.trim() || "Юный считатель",
+    solved: progress.solved,
+    attempts: progress.attempts,
+    firstTry: progress.firstTry,
+    bestStreak: progress.bestStreak,
+    masteredTopicIds: topicIds.filter(
+      (id) => getTopicMastery(progress.masteryTopics[id]).complete
+    ),
+    trophies,
+  };
   const syncLabel = !isAuthenticated
     ? "Локально · в этом браузере"
     : migrateMutation.isPending || attemptMutation.isPending
@@ -631,6 +649,19 @@ export default function App() {
         </button>
         <button
           type="button"
+          className={view === "world" ? "active" : ""}
+          aria-pressed={view === "world"}
+          onClick={() => {
+            setView("world");
+            setMenuOpen(false);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        >
+          <Rocket size={16} />
+          Мой мир
+        </button>
+        <button
+          type="button"
           className={view === "school" ? "active" : ""}
           aria-pressed={view === "school"}
           onClick={() => {
@@ -836,7 +867,9 @@ export default function App() {
                         : "Мои домашние работы"
                       : view === "stipend"
                         ? "Стипендия"
-                        : (activeTopic?.navTitle ?? "Смешанная")}
+                        : view === "world"
+                          ? "Моя планета"
+                          : (activeTopic?.navTitle ?? "Смешанная")}
             </span>
           </div>
           <div className="streak">
@@ -869,6 +902,10 @@ export default function App() {
             authenticated={isAuthenticated}
             onLogin={() => setAccountOpen(true)}
           />
+        ) : view === "world" ? (
+          <Suspense fallback={<p className="world-loading">Запускаем планету…</p>}>
+            <WorldPage input={worldInput} themeId={previewTheme} />
+          </Suspense>
         ) : view === "competition" ? (
           <CompetitionPage
             key={user?.id ?? "guest"}
