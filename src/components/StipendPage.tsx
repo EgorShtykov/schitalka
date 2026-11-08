@@ -38,7 +38,7 @@ export function StipendPage({ authenticated, onLogin }: StipendPageProps) {
     return (
       <section className="stipend-login stipend-panel">
         <PiggyBank size={42} />
-        <div className="eyebrow">Стипендия</div>
+        <div className="eyebrow">Звезда-копилка</div>
         <h1>Домашки превращаются в призы</h1>
         <p>
           Войди в аккаунт, чтобы увидеть свою копилку, выбрать приз-мечту и
@@ -88,11 +88,11 @@ function StipendStudent() {
     return (
       <section className="stipend-login stipend-panel">
         <PiggyBank size={42} />
-        <div className="eyebrow">Стипендия</div>
+        <div className="eyebrow">Звезда-копилка</div>
         <h1>Скоро старт!</h1>
         <p>
           Учитель ещё не запустил стипендиальную программу. Как только он это
-          сделает, каждая проверенная домашка начнёт пополнять твою копилку.
+          сделает, каждое проверенное послание начнёт пополнять твою копилку.
         </p>
       </section>
     );
@@ -108,7 +108,7 @@ function StipendStudent() {
     <div className="stipend-page">
       <section className="stipend-hero">
         <div>
-          <div className="eyebrow">Стипендия</div>
+          <div className="eyebrow">Звезда-копилка</div>
           <h1>Твоя копилка</h1>
           <p>
             +{program.amountPerHomework} ₽ за каждую проверенную домашку и +
@@ -264,7 +264,7 @@ function StipendStudent() {
           <li>Считаем выполнение, а не идеальность: доработанная после разбора домашка тоже засчитывается.</li>
           <li>Заработанное не сгорает: баланс переходит в следующий цикл целиком.</li>
           <li>Пропущенное занятие можно отработать — тогда бонус цикла сохраняется.</li>
-          <li>Никакой лотереи: копилка растёт только от твоих домашек.</li>
+          <li>Никакой лотереи: копилка растёт только от твоих посланий.</li>
           <li>Выдаём вещь, а не наличные: приз выбираешь ты из каталога.</li>
         </ul>
       </section>

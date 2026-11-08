@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { trpc } from "@/providers/trpc";
 import { StipendTeacher } from "./StipendTeacher";
+import observerMessage from "../assets/avatar/observer-message.webp";
 import "./SchoolPage.css";
 
 type SchoolPageProps = {
@@ -72,7 +73,7 @@ export function SchoolPage({
     return (
       <section className="school-login school-panel">
         <School size={42} />
-        <div className="eyebrow">Классы и домашние работы</div>
+        <div className="eyebrow">Классы и послания</div>
         <h1>Школьный раздел</h1>
         <p>
           Войдите в аккаунт, чтобы увидеть задания учителя, отправить решение и
@@ -191,7 +192,7 @@ function TeacherCabinet() {
       <section className="school-hero">
         <div>
           <div className="eyebrow">Учительский кабинет</div>
-          <h1>Классы, работы и журнал</h1>
+          <h1>Классы, послания и журнал</h1>
           <p>
             Назначайте задания, проверяйте решения и следите за реальным
             прогрессом учеников.
@@ -245,7 +246,7 @@ function TeacherCabinet() {
           onClick={() => setTab("stipend")}
         >
           <PiggyBank size={17} />
-          Стипендия
+          Копилка
         </button>
       </div>
       {error && (
@@ -441,7 +442,7 @@ function TeacherCabinet() {
                             </div>
                             <div>
                               <strong>{mastered}</strong>
-                              <span>зачётов</span>
+                              <span>секторов</span>
                             </div>
                             {expanded ? (
                               <ChevronUp size={18} />
@@ -469,7 +470,7 @@ function TeacherCabinet() {
                                   <strong>{stats?.sparkBalance ?? 0}</strong>
                                 </span>
                               </div>
-                              <h4>Прогресс по темам</h4>
+                              <h4>Прогресс по секторам</h4>
                               {member.topics.length ? (
                                 <div className="topic-stat-grid">
                                   {member.topics.map(topic => (
@@ -487,7 +488,7 @@ function TeacherCabinet() {
                                         %
                                       </strong>
                                       <small>
-                                        Зачёт: {topic.masterySolved}/20
+                                        Освоение: {topic.masterySolved}/20
                                       </small>
                                     </div>
                                   ))}
@@ -823,8 +824,7 @@ function TeacherCabinet() {
                                     event.nativeEvent as SubmitEvent
                                   ).submitter as HTMLButtonElement | null;
                                   const status = submitter?.value as
-                                    | "reviewed"
-                                    | "needs_revision";
+                                    "reviewed" | "needs_revision";
                                   void run(
                                     reviewSubmission.mutateAsync({
                                       submissionId: submission.id,
@@ -1081,7 +1081,9 @@ function StudentCabinet() {
         throw new Error(payload.error || "Не удалось удалить файл");
       await utils.school.overview.invalidate();
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Не удалось удалить файл");
+      setError(
+        reason instanceof Error ? reason.message : "Не удалось удалить файл"
+      );
     }
   };
 
@@ -1098,11 +1100,11 @@ function StudentCabinet() {
     <div className="school-cabinet student-cabinet">
       <section className="school-hero">
         <div>
-          <div className="eyebrow">Мои классы</div>
-          <h1>Домашние работы</h1>
-          <p>Открой задание, напиши решение и прикрепи до пяти фото или PDF.</p>
+          <div className="eyebrow">Связь со станцией «Земля»</div>
+          <h1>Послания с Земли</h1>
+          <p>Здесь приземляются задания и письма Наблюдателя. Открой послание, напиши решение и прикрепи до пяти фото или PDF.</p>
         </div>
-        <School size={54} />
+        <img className="school-observer" src={observerMessage} alt="Наблюдатель со станции «Земля»" />
       </section>
       {error && (
         <div className="school-error" role="alert">

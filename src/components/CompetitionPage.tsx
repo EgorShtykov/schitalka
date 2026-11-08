@@ -56,7 +56,7 @@ function playerTime(value: number) {
 function TeacherRewards() {
   const [studentLogin, setStudentLogin] = useState("");
   const [amount, setAmount] = useState(2);
-  const [note, setNote] = useState("Домашняя работа выполнена");
+  const [note, setNote] = useState("Послание выполнено");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const rewardId = useRef(crypto.randomUUID());
@@ -87,7 +87,7 @@ function TeacherRewards() {
         <span className="teacher-mark"><Home size={21} /></span>
         <div>
           <span>Панель учителя</span>
-          <h2 id="teacher-rewards-title">Искры за домашнюю работу</h2>
+          <h2 id="teacher-rewards-title">Искры за послания</h2>
           <p>Проверь работу, затем вручную подтверди награду. Повторная отправка той же формы не удвоит искры.</p>
         </div>
       </div>
@@ -236,7 +236,7 @@ export function CompetitionPage(props: CompetitionPageProps) {
       <div className="competition-page">
         <section className="competition-guest">
           <span className="competition-guest-icon"><Swords size={34} /></span>
-          <div className="eyebrow">Сетевая арена · 3–8 учеников</div>
+          <div className="eyebrow">Космические гонки · 3–8 учеников</div>
           <h1>Один набор заданий.<br />Один честный финиш.</h1>
           <p>Войди в аккаунт, чтобы создать комнату или присоединиться по коду. Победители получат постоянные кубки и искры для новых оформлений.</p>
           <button type="button" className="primary-button" onClick={props.onLogin}><UserRound size={18} />Войти и играть</button>
@@ -249,7 +249,7 @@ export function CompetitionPage(props: CompetitionPageProps) {
     <div className="competition-page">
       <section className="competition-heading">
         <div>
-          <div className="eyebrow"><Swords size={14} />Сетевая арена</div>
+          <div className="eyebrow"><Swords size={14} />Космические гонки</div>
           <h1>{room?.status === "finished" ? "Финиш. Время кубков!" : room ? `Комната ${room.code}` : "Соревнуйся. Решай. Забирай стиль."}</h1>
           <p>{COMPETITION_TASK_COUNT} одинаковых заданий · 90 секунд · сначала точность, затем время.</p>
         </div>
@@ -306,9 +306,9 @@ export function CompetitionPage(props: CompetitionPageProps) {
             <div className="spark-history-heading"><Sparkles size={19} /><h2>Последние награды</h2></div>
             {props.sparkEvents.length ? (
               <ul>{props.sparkEvents.slice(0, 5).map((event, index) => (
-                <li key={`${event.createdAt.getTime()}-${index}`}><span>{event.note ?? (event.kind === "homework" ? "Домашняя работа" : "Награда")}</span><strong>{event.amount > 0 ? "+" : ""}{event.amount}</strong></li>
+                <li key={`${event.createdAt.getTime()}-${index}`}><span>{event.note ?? (event.kind === "homework" ? "Послание" : "Награда")}</span><strong>{event.amount > 0 ? "+" : ""}{event.amount}</strong></li>
               ))}</ul>
-            ) : <p>Здесь появятся искры за соревнования и подтверждённые учителем домашние работы.</p>}
+            ) : <p>Здесь появятся искры за гонки и подтверждённые учителем послания.</p>}
           </section>
         </div>
       ) : roomQuery.isLoading ? (

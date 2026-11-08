@@ -37,6 +37,22 @@
   line-height: 1.15;
 }
 
+.world-title-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.world-observer {
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent, #0f7b5f);
+  box-shadow: 0 6px 20px rgba(10, 20, 40, 0.25);
+}
+
 .world-subtitle {
   margin: 6px 0 0;
   color: var(--muted, #5a6b66);

@@ -37,11 +37,11 @@ export function RewardBar({ themeId, plusBalance, sparkBalance, trophies, authen
   const theme = getTheme(themeId);
   const trophyCount = trophies.gold + trophies.silver + trophies.bronze;
   return (
-    <section className="reward-bar" aria-label="Оформление и награды">
+    <section className="reward-bar" aria-label="Пейзаж планеты и награды">
       <button type="button" className="reward-theme" onClick={onWorkshop}>
         <span className="reward-cat"><CatMascot themeId={theme.id} happy /></span>
         <span className="reward-copy">
-          <span className="reward-kicker"><Palette size={14} />Твоё оформление</span>
+          <span className="reward-kicker"><Palette size={14} />Пейзаж планеты</span>
           <strong>{theme.name}</strong>
           <span className="reward-status"><Cloud size={13} />{syncLabel}</span>
         </span>
@@ -51,7 +51,7 @@ export function RewardBar({ themeId, plusBalance, sparkBalance, trophies, authen
         <button type="button" className="plus-balance" onClick={onWorkshop} aria-label={`${plusBalance} ${plusWord(plusBalance)}. Открыть мастерскую`}>
           <span><Plus size={19} strokeWidth={3} /></span>
           <strong>{plusBalance}</strong>
-          <small>{plusWord(plusBalance)}<br />за зачёты</small>
+          <small>{plusWord(plusBalance)}<br />за сектора</small>
         </button>
         <button type="button" className="plus-balance spark-balance" onClick={onWorkshop} aria-label={`${sparkBalance} ${sparkWord(sparkBalance)}. Открыть мастерскую`}>
           <span><Sparkles size={18} /></span>
@@ -59,9 +59,9 @@ export function RewardBar({ themeId, plusBalance, sparkBalance, trophies, authen
           <small>{sparkWord(sparkBalance)}<br />за активность</small>
         </button>
       </div>
-      <button type="button" className="arena-button" onClick={onCompetition} aria-label={`Открыть сетевую арену. Кубков: ${trophyCount}`}>
+      <button type="button" className="arena-button" onClick={onCompetition} aria-label={`Открыть космические гонки. Кубков: ${trophyCount}`}>
         <Swords size={18} />
-        <span>Арена</span>
+        <span>Гонки</span>
         <small><Trophy size={12} />{trophyCount}</small>
       </button>
       <button type="button" className="account-button" onClick={onAccount}>

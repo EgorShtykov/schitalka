@@ -355,7 +355,7 @@ export default function App() {
           });
           applyCloudState(result.state);
           if (result.awarded)
-            setRewardNotice(`+1 плюсик за первый зачёт темы «${topicTitle}»`);
+            setRewardNotice(`+1 плюсик за первое освоение сектора «${topicTitle}»`);
         })
         .catch(reason => {
           setSyncError(
@@ -435,7 +435,7 @@ export default function App() {
         justCompleted
           ? `Тема «${problem.topicTitle}» завершена!`
           : difficulty === "easy"
-            ? "Верно! Для зачёта выбери уровень «Уверенно» или «Сложно»."
+            ? "Верно! Чтобы сектор засчитался, выбери «Уверенно» или «Сложно»."
             : praise[Math.floor(Math.random() * praise.length)]
       );
       if (clean) setSessionCorrect(value => value + 1);
@@ -645,7 +645,7 @@ export default function App() {
           onClick={openCompetition}
         >
           <Swords size={16} />
-          Арена
+          Гонки
         </button>
         <button
           type="button"
@@ -658,7 +658,7 @@ export default function App() {
           }}
         >
           <Rocket size={16} />
-          Мой мир
+          Моя планета
         </button>
         <button
           type="button"
@@ -685,7 +685,7 @@ export default function App() {
             }}
           >
             <PiggyBank size={16} />
-            Стипендия
+            Копилка
           </button>
         )}
         <button
@@ -702,7 +702,7 @@ export default function App() {
         <div>
           <span>Курс · {grade} класс</span>
           <strong>
-            {courseMastery.completed}/{courseMastery.total} тем
+            {courseMastery.completed}/{courseMastery.total} секторов
           </strong>
         </div>
         <div
@@ -860,13 +860,13 @@ export default function App() {
                 : view === "workshop"
                   ? "Мастерская"
                   : view === "competition"
-                    ? "Сетевая арена"
+                    ? "Космические гонки"
                     : view === "school"
                       ? user?.role === "admin"
                         ? "Учительский кабинет"
-                        : "Мои домашние работы"
+                        : "Послания с Земли"
                       : view === "stipend"
-                        ? "Стипендия"
+                        ? "Звезда-копилка"
                         : view === "world"
                           ? "Моя планета"
                           : (activeTopic?.navTitle ?? "Смешанная")}
@@ -964,18 +964,18 @@ export default function App() {
 
             <section
               className={`mastery-panel ${masteryComplete ? "complete" : ""}`}
-              aria-label={activeTopic ? "Прогресс темы" : "Прогресс курса"}
+              aria-label={activeTopic ? "Прогресс сектора" : "Карта галактики"}
             >
               <div className="mastery-main">
                 <div className="mastery-label">
                   <Flag size={17} />
-                  {activeTopic ? "До завершения темы" : "До завершения курса"}
+                  {activeTopic ? "До освоения сектора" : "До полного сияния"}
                 </div>
                 {masteryComplete ? (
                   <div className="mastery-number">
                     <strong>Готово!</strong>
                     <span>
-                      {activeTopic ? "Тема освоена" : "Все темы курса освоены"}
+                      {activeTopic ? "Сектор освоен" : "Вся галактика сияет"}
                     </span>
                   </div>
                 ) : (
@@ -986,9 +986,9 @@ export default function App() {
                 )}
                 <p>
                   {masteryComplete
-                    ? "Можно закрепить результат или перейти к следующей теме."
+                    ? "Можно закрепить результат или перейти к следующему сектору."
                     : difficulty === "easy"
-                      ? "Разминка не засчитывается. Для зачёта выбери «Уверенно» или «Сложно»."
+                      ? "Разминка не засчитывается. Чтобы сектор зажёгся, выбери «Уверенно» или «Сложно»."
                       : "Если дальше решать с первой попытки и без подсказок."}
                 </p>
               </div>
@@ -1012,7 +1012,7 @@ export default function App() {
                 ) : (
                   <>
                     <div>
-                      <span>Темы с зачётом</span>
+                      <span>Сектора освоены</span>
                       <strong>
                         {courseMastery.completed} / {courseMastery.total}
                       </strong>
@@ -1330,12 +1330,12 @@ export default function App() {
 
               <aside className="practice-rail">
                 <section className="rail-section mastery-guide">
-                  <h2>Как получить зачёт</h2>
+                  <h2>Как освоить сектор</h2>
                   <div>
                     <strong>{TOPIC_TASK_GOAL}</strong>
                     <span>
                       решённых заданий
-                      <br />в каждой теме
+                      <br />в каждом секторе
                     </span>
                   </div>
                   <div>
@@ -1346,8 +1346,8 @@ export default function App() {
                     </span>
                   </div>
                   <p>
-                    Зачёт идёт только на уровнях «Уверенно» и «Сложно». В
-                    смешанной тренировке ответ засчитывается в тему задания.
+                    Освоение идёт только на уровнях «Уверенно» и «Сложно». В
+                    смешанной тренировке ответ засчитывается в сектор задания.
                   </p>
                 </section>
                 <section className="rail-section session-plan">
@@ -1407,9 +1407,9 @@ export default function App() {
           <span>
             {isAuthenticated
               ? "Прогресс, плюсики, искры, кубки и оформления сохраняются в аккаунте."
-              : "Без аккаунта прогресс сохраняется только в этом браузере. Для арены нужен вход."}
+              : "Без аккаунта прогресс сохраняется только в этом браузере. Для гонок нужен вход."}
           </span>
-          <span>48 тренировок · 18 уроков · сетевая арена · 4–9 классы</span>
+          <span>48 тренировок · 18 уроков · космические гонки · 4–9 классы</span>
         </footer>
       </main>
       {rewardNotice && (

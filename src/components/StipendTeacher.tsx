@@ -49,7 +49,7 @@ export function StipendTeacher({
   if (overview.error || !data)
     return (
       <div className="school-error" role="alert">
-        {overview.error?.message || "Стипендия не загрузилась"}
+        {overview.error?.message || "Звезда-копилка не загрузилась"}
       </div>
     );
 

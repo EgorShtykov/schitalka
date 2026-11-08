@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { Camera, Rocket } from "lucide-react";
 import { PlanetCanvas, type PlanetCanvasRef } from "../world/PlanetCanvas";
+import observerHello from "../assets/avatar/observer-hello.webp";
 import { buildWorldSpec, type WorldInput } from "../world/worldData";
 import "./WorldPage.css";
 
@@ -9,7 +10,7 @@ interface WorldPageProps {
   themeId: string;
 }
 
-/** Страница «Мой мир»: живая планета, которая растёт от решённых заданий. */
+/** Страница «Моя планета»: живая планета, которая растёт от решённых заданий. */
 export function WorldPage({ input, themeId }: WorldPageProps) {
   const canvasRef = useRef<PlanetCanvasRef>(null);
   const [notice, setNotice] = useState("");
@@ -44,20 +45,23 @@ export function WorldPage({ input, themeId }: WorldPageProps) {
   const lanterns = spec.placements.filter((p) => p.kind === "lantern").length;
 
   return (
-    <section className="world-page" aria-label="Мой мир">
+    <section className="world-page" aria-label="Моя планета">
       <header className="world-header">
         <div>
           <p className="world-kicker">
-            <Rocket size={15} aria-hidden="true" /> Мой мир
+            <Rocket size={15} aria-hidden="true" /> Моя планета
           </p>
-          <h1 className="world-title">Планета «{spec.planetName}»</h1>
+          <div className="world-title-row">
+            <img className="world-observer" src={observerHello} alt="Наблюдатель приветствует тебя" />
+            <h1 className="world-title">Планета «{spec.planetName}»</h1>
+          </div>
           <p className="world-subtitle">
-            Мир растёт от твоих решений. Покрути планету мышкой или пальцем.
+            Планета растёт от твоих решений. Покрути планету мышкой или пальцем.
           </p>
         </div>
         <button type="button" className="world-snapshot" onClick={saveSnapshot}>
           <Camera size={16} aria-hidden="true" />
-          Снимок мира
+          Снимок планеты
         </button>
       </header>
 
@@ -75,14 +79,14 @@ export function WorldPage({ input, themeId }: WorldPageProps) {
       </div>
 
       <details className="world-legend">
-        <summary>Как растёт мир?</summary>
+        <summary>Как растёт планета?</summary>
         <ul>
           <li>🌳 Каждые 8 решённых заданий — новое дерево. Высокая точность делает деревья цветущими.</li>
           <li>🏮 Каждые 5 ответов подряд в лучшей серии — тёплый фонарь на пути к вершине.</li>
-          <li>💎 Освоенная тема — кристалл на планете и созвездие в её небе.</li>
+          <li>💎 Освоенный сектор — кристалл на планете и созвездие в её небе.</li>
           <li>🏠 После 50 решённых заданий на планете появляется домик.</li>
           <li>✨ После 10 решённых заданий у планеты появляется дух-спутник — он растёт вместе с тобой.</li>
-          <li>🏆 Кубки с Арены встают на вершину мира.</li>
+          <li>🏆 Кубки с космических гонок встают на вершину планеты.</li>
         </ul>
       </details>
     </section>
