@@ -779,3 +779,6 @@ to{opacity:1}
 [data-theme=observatory] .mastery-track>span{background:var(--on-accent)}
 [data-theme=observatory] .workshop-wallet>svg{color:var(--paper)}
 [data-theme=observatory] .live-label{color:var(--green);background:var(--paper)}
+
+/* Заглушка экрана «Пробуждение», пока грузится 3D-чанк */
+.intro-loading{position:fixed;inset:0;z-index:89;background-color:#0a0e27;background-image:radial-gradient(circle at 12% 22%,rgba(157,180,255,.5) 0 1px,transparent 1.6px),radial-gradient(circle at 72% 12%,rgba(255,217,124,.55) 0 1px,transparent 1.6px),radial-gradient(circle at 43% 79%,rgba(255,217,124,.3) 0 1px,transparent 1.6px);background-size:230px 250px,290px 270px,250px 290px}

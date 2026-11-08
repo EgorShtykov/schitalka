@@ -1,0 +1,136 @@
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0e27;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+.intro-overlay.leaving {
+  opacity: 0;
+  transform: scale(1.08);
+  pointer-events: none;
+}
+
+/* Дрейфующая космическая пыль — видна и пока грузится 3D-движок */
+.intro-dust,
+.intro-loading {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 12% 22%, rgba(157, 180, 255, 0.5) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 72% 12%, rgba(255, 217, 124, 0.55) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 87% 62%, rgba(157, 180, 255, 0.35) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 43% 79%, rgba(255, 217, 124, 0.3) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 62% 38%, rgba(123, 63, 160, 0.14), transparent 44%),
+    radial-gradient(circle at 18% 82%, rgba(49, 67, 155, 0.18), transparent 40%);
+  background-size: 230px 250px, 290px 270px, 330px 310px, 250px 290px, 100% 100%, 100% 100%;
+  animation: intro-drift 26s linear infinite;
+  pointer-events: none;
+}
+.intro-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 89;
+  background-color: #0a0e27;
+}
+@keyframes intro-drift {
+  from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+  to { background-position: 230px 500px, -290px 540px, 330px -620px, -250px -580px, 0 0, 0 0; }
+}
+
+.intro-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.intro-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0 24px;
+  text-align: center;
+  /* Текст занимает нижнюю треть, планета остаётся центром */
+  margin-top: 34vh;
+}
+
+.intro-line {
+  margin: 0;
+  font-size: clamp(18px, 2.6vw, 26px);
+  font-weight: 500;
+  line-height: 1.45;
+  color: #eef1ff;
+  text-shadow: 0 2px 24px rgba(10, 14, 39, 0.8);
+  opacity: 0;
+  transform: translateY(14px);
+  animation: intro-line-in 1.4s ease forwards;
+}
+.intro-line-1 { animation-delay: 1.6s; }
+.intro-line-2 { animation-delay: 3.6s; }
+.intro-line-3 {
+  color: #ffd97c;
+  font-weight: 700;
+  animation-delay: 5.4s;
+}
+
+.intro-ignite {
+  margin-top: 26px;
+  padding: 15px 34px;
+  border: none;
+  border-radius: 999px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0a0e27;
+  background: linear-gradient(120deg, #ffd97c, #ffb84d);
+  box-shadow: 0 0 0 0 rgba(255, 217, 124, 0.55), 0 12px 40px rgba(255, 184, 77, 0.35);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(14px);
+  animation:
+    intro-line-in 1.4s ease forwards 7.6s,
+    intro-ignite-pulse 2.6s ease-in-out infinite 9s;
+  transition: transform 0.18s ease;
+}
+.intro-ignite:hover { transform: translateY(-2px) scale(1.03); }
+.intro-ignite:active { transform: scale(0.98); }
+
+.intro-skip {
+  position: absolute;
+  right: 22px;
+  bottom: 18px;
+  z-index: 2;
+  border: none;
+  background: none;
+  color: rgba(167, 176, 216, 0.55);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 8px;
+  opacity: 0;
+  animation: intro-line-in 1s ease forwards 4s;
+}
+.intro-skip:hover { color: rgba(238, 241, 255, 0.9); }
+
+@keyframes intro-line-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes intro-ignite-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 217, 124, 0.55), 0 12px 40px rgba(255, 184, 77, 0.35); }
+  50% { box-shadow: 0 0 0 16px rgba(255, 217, 124, 0), 0 12px 40px rgba(255, 184, 77, 0.35); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-dust { animation: none; }
+  .intro-line, .intro-ignite, .intro-skip {
+    animation-duration: 0.01s;
+    animation-delay: 0.2s;
+  }
+  .intro-ignite { animation-name: intro-line-in; }
+  .intro-overlay { transition: none; }
+}

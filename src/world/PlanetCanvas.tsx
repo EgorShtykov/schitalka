@@ -12,6 +12,7 @@ interface PlanetCanvasProps {
   themeId: string;
   seed: number;
   className?: string;
+  flyIn?: boolean;
 }
 
 /**
@@ -19,7 +20,7 @@ interface PlanetCanvasProps {
  * Рендер останавливается, когда канвас вне экрана или вкладка скрыта.
  */
 export const PlanetCanvas = forwardRef<PlanetCanvasRef, PlanetCanvasProps>(function PlanetCanvas(
-  { spec, themeId, seed, className },
+  { spec, themeId, seed, className, flyIn },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -32,7 +33,7 @@ export const PlanetCanvas = forwardRef<PlanetCanvasRef, PlanetCanvasProps>(funct
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-    const handle = createPlanetScene(container, spec, paletteForTheme(themeId), seed);
+    const handle = createPlanetScene(container, spec, paletteForTheme(themeId), seed, { flyIn });
     sceneRef.current = handle;
 
     const intersection = new IntersectionObserver(
@@ -52,7 +53,7 @@ export const PlanetCanvas = forwardRef<PlanetCanvasRef, PlanetCanvasProps>(funct
       handle.dispose();
       sceneRef.current = null;
     };
-  }, [spec, themeId, seed]);
+  }, [spec, themeId, seed, flyIn]);
 
   return <div ref={containerRef} className={className} role="img" aria-label={`Планета «${spec.planetName}»`} />;
 });

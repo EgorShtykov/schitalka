@@ -50,6 +50,9 @@ import type { WorldInput } from "./world/worldData";
 const WorldPage = lazy(() =>
   import("./components/WorldPage").then((module) => ({ default: module.WorldPage }))
 );
+const IntroView = lazy(() =>
+  import("./components/IntroView").then((module) => ({ default: module.IntroView }))
+);
 
 type AnswerStatus = "idle" | "correct" | "wrong" | "revealed";
 type SessionResult = "clean" | "assisted";
@@ -136,6 +139,21 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [previewTheme, setPreviewTheme] = useState("observatory");
+  const [introSeen, setIntroSeen] = useState(() => {
+    try {
+      return localStorage.getItem("schitalka-intro-seen-v1") === "1";
+    } catch {
+      return true;
+    }
+  });
+  const finishIntro = () => {
+    try {
+      localStorage.setItem("schitalka-intro-seen-v1", "1");
+    } catch {
+      // приватный режим — просто не запоминаем
+    }
+    setIntroSeen(true);
+  };
   const [workshopError, setWorkshopError] = useState("");
   const [busyTheme, setBusyTheme] = useState<string | null>(null);
   const [syncError, setSyncError] = useState("");
@@ -1428,6 +1446,11 @@ export default function App() {
             Проверить снова
           </button>
         </div>
+      )}
+      {!introSeen && (
+        <Suspense fallback={<div className="intro-loading" aria-hidden="true" />}>
+          <IntroView onDone={finishIntro} />
+        </Suspense>
       )}
       <AccountDialog
         open={accountOpen}

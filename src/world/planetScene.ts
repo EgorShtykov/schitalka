@@ -278,6 +278,7 @@ export function createPlanetScene(
   spec: WorldSpec,
   palette: WorldPalette,
   seed: number,
+  opts: { flyIn?: boolean } = {},
 ): PlanetSceneHandle {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
@@ -303,6 +304,16 @@ export function createPlanetScene(
   controls.autoRotate = true;
   controls.autoRotateSpeed = 0.55;
   controls.maxPolarAngle = Math.PI * 0.85;
+
+  // Пролёт камеры из глубины космоса к планете (экран «Пробуждение»).
+  const flyDir = new THREE.Vector3(6, 11, 33).normalize();
+  const flyFrom = 66;
+  const flyTo = 33;
+  let flyT = opts.flyIn ? 0 : 1;
+  if (opts.flyIn) {
+    controls.enabled = false;
+    camera.position.copy(flyDir).multiplyScalar(flyFrom);
+  }
 
   const tint = timeTint();
   const hemisphere = new THREE.HemisphereLight(new THREE.Color(palette.skyBottom).lerp(new THREE.Color("#ffffff"), 0.45), "#131a3a", 1.7 * tint.intensity);
@@ -477,6 +488,14 @@ export function createPlanetScene(
     if (!running) return;
     elapsed += delta;
 
+    if (flyT < 1) {
+      flyT = Math.min(1, flyT + delta / 5.5);
+      const eased = 1 - Math.pow(1 - flyT, 3);
+      const dist = flyFrom + (flyTo - flyFrom) * eased;
+      camera.position.copy(flyDir).multiplyScalar(dist);
+      camera.lookAt(0, 0, 0);
+      if (flyT >= 1) controls.enabled = true;
+    }
     controls.update();
     constellationDome.rotation.y = domeBaseRotation + elapsed * 0.02;
     stars.rotation.y = elapsed * 0.004;
