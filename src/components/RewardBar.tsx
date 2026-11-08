@@ -41,7 +41,7 @@ export function RewardBar({ themeId, plusBalance, sparkBalance, trophies, authen
       <button type="button" className="reward-theme" onClick={onWorkshop}>
         <span className="reward-cat"><CatMascot themeId={theme.id} happy /></span>
         <span className="reward-copy">
-          <span className="reward-kicker"><Palette size={14} />Пейзаж планеты</span>
+          <span className="reward-kicker"><Palette size={14} />Верфь · пейзаж планеты</span>
           <strong>{theme.name}</strong>
           <span className="reward-status"><Cloud size={13} />{syncLabel}</span>
         </span>
@@ -59,9 +59,9 @@ export function RewardBar({ themeId, plusBalance, sparkBalance, trophies, authen
           <small>{sparkWord(sparkBalance)}<br />за активность</small>
         </button>
       </div>
-      <button type="button" className="arena-button" onClick={onCompetition} aria-label={`Открыть космические гонки. Кубков: ${trophyCount}`}>
+      <button type="button" className="arena-button" onClick={onCompetition} aria-label={`Открыть космодром. Кубков: ${trophyCount}`}>
         <Swords size={18} />
-        <span>Гонки</span>
+        <span>Космодром</span>
         <small><Trophy size={12} />{trophyCount}</small>
       </button>
       <button type="button" className="account-button" onClick={onAccount}>

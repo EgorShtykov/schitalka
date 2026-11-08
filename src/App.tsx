@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import {
   ArrowRight,
   BookOpen,
@@ -6,18 +7,13 @@ import {
   CheckCircle2,
   ChevronRight,
   CircleHelp,
-  ClipboardList,
   Clock3,
   Flag,
   Lightbulb,
   Menu,
-  Palette,
-  PiggyBank,
   Plus,
-  Rocket,
   RotateCcw,
   Sparkles,
-  Swords,
   Target,
   Trophy,
   X,
@@ -629,92 +625,103 @@ export default function App() {
   const formatTime = (seconds: number) =>
     `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 
+  const navSections = (
+    [
+      {
+        id: "practice",
+        name: "Карта галактики",
+        caption: "тренировка",
+        hue: 224,
+        onClick: () => {
+          setView("practice");
+          setMenuOpen(false);
+        },
+      },
+      {
+        id: "theory",
+        name: "Архив карт",
+        caption: "теория",
+        hue: 262,
+        onClick: () => {
+          setView("theory");
+          setMenuOpen(false);
+        },
+      },
+      {
+        id: "competition",
+        name: "Космодром",
+        caption: "гонки",
+        hue: 18,
+        onClick: openCompetition,
+      },
+      {
+        id: "world",
+        name: "Моя планета",
+        caption: "твой мир",
+        hue: 150,
+        onClick: () => {
+          setView("world");
+          setMenuOpen(false);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        },
+      },
+      {
+        id: "school",
+        name: "Станция «Земля»",
+        caption: "школа и учитель",
+        hue: 190,
+        onClick: () => {
+          setView("school");
+          setMenuOpen(false);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        },
+      },
+      {
+        id: "stipend",
+        name: "Звезда-копилка",
+        caption: "стипендия",
+        hue: 45,
+        onClick: () => {
+          setView("stipend");
+          setMenuOpen(false);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        },
+      },
+      {
+        id: "workshop",
+        name: "Верфь",
+        caption: "оформление",
+        hue: 320,
+        onClick: openWorkshop,
+      },
+    ] satisfies Array<{
+      id: AppView;
+      name: string;
+      caption: string;
+      hue: number;
+      onClick: () => void;
+    }>
+  ).filter(section => section.id !== "stipend" || user?.role !== "admin");
+
   const navigation = (
     <>
       <div className="section-switch" aria-label="Разделы сайта">
-        <button
-          type="button"
-          className={view === "practice" ? "active" : ""}
-          aria-pressed={view === "practice"}
-          onClick={() => {
-            setView("practice");
-            setMenuOpen(false);
-          }}
-        >
-          <Target size={16} />
-          Тренировка
-        </button>
-        <button
-          type="button"
-          className={view === "theory" ? "active" : ""}
-          aria-pressed={view === "theory"}
-          onClick={() => {
-            setView("theory");
-            setMenuOpen(false);
-          }}
-        >
-          <BookOpen size={16} />
-          Теория
-        </button>
-        <button
-          type="button"
-          className={view === "competition" ? "active" : ""}
-          aria-pressed={view === "competition"}
-          onClick={openCompetition}
-        >
-          <Swords size={16} />
-          Гонки
-        </button>
-        <button
-          type="button"
-          className={view === "world" ? "active" : ""}
-          aria-pressed={view === "world"}
-          onClick={() => {
-            setView("world");
-            setMenuOpen(false);
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-        >
-          <Rocket size={16} />
-          Моя планета
-        </button>
-        <button
-          type="button"
-          className={view === "school" ? "active" : ""}
-          aria-pressed={view === "school"}
-          onClick={() => {
-            setView("school");
-            setMenuOpen(false);
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-        >
-          <ClipboardList size={16} />
-          Школа
-        </button>
-        {user?.role !== "admin" && (
+        {navSections.map(section => (
           <button
+            key={section.id}
             type="button"
-            className={view === "stipend" ? "active" : ""}
-            aria-pressed={view === "stipend"}
-            onClick={() => {
-              setView("stipend");
-              setMenuOpen(false);
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
+            className={`nav-item ${view === section.id ? "active" : ""}`}
+            aria-pressed={view === section.id}
+            style={{ "--planet-hue": section.hue } as CSSProperties}
+            onClick={section.onClick}
           >
-            <PiggyBank size={16} />
-            Копилка
+            <span className="nav-planet" aria-hidden="true" />
+            <span className="nav-copy">
+              <span className="nav-name">{section.name}</span>
+              <span className="nav-caption">{section.caption}</span>
+            </span>
           </button>
-        )}
-        <button
-          type="button"
-          className={view === "workshop" ? "active" : ""}
-          aria-pressed={view === "workshop"}
-          onClick={openWorkshop}
-        >
-          <Palette size={16} />
-          Стиль
-        </button>
+        ))}
       </div>
       <div className="course-mini">
         <div>
@@ -820,7 +827,7 @@ export default function App() {
             ) : (
               <Target size={19} />
             )}
-            <span>{view === "practice" ? "Теория" : "Тренажёр"}</span>
+            <span>{view === "practice" ? "Архив" : "Карта"}</span>
           </button>
           <button
             type="button"
@@ -874,20 +881,20 @@ export default function App() {
             <ChevronRight size={14} />
             <span>
               {view === "theory"
-                ? "Теория и формулы"
+                ? "Архив звёздных карт"
                 : view === "workshop"
-                  ? "Мастерская"
+                  ? "Верфь"
                   : view === "competition"
-                    ? "Космические гонки"
+                    ? "Космодром"
                     : view === "school"
                       ? user?.role === "admin"
                         ? "Учительский кабинет"
-                        : "Послания с Земли"
+                        : "Станция «Земля»"
                       : view === "stipend"
                         ? "Звезда-копилка"
                         : view === "world"
                           ? "Моя планета"
-                          : (activeTopic?.navTitle ?? "Смешанная")}
+                          : (activeTopic?.navTitle ?? "Вся галактика")}
             </span>
           </div>
           <div className="streak">

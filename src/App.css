@@ -255,6 +255,19 @@ to{opacity:1;transform:translateY(0)}
 .section-switch{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:18px 0 21px;padding:4px;background:color-mix(in oklch,var(--brown) 7%,transparent);border-radius:12px}
 .section-switch button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:39px;padding:7px 8px;color:var(--text-muted);background:transparent;border:0;border-radius:9px;font-size:12px;font-weight:650}
 .section-switch button.active{color:var(--green);background:var(--paper);box-shadow:0 1px 5px color-mix(in oklch,var(--brown) 10%,transparent)}
+.section-switch .nav-item{justify-content:flex-start;gap:9px;padding:7px 10px;text-align:left}
+.nav-planet{position:relative;flex:0 0 auto;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 34% 30%,hsl(var(--planet-hue) 90% 80%),hsl(var(--planet-hue) 62% 46%) 72%);box-shadow:0 0 7px hsl(var(--planet-hue) 85% 62% / .6)}
+.nav-planet::after{content:"";position:absolute;inset:-5px -7px;border:1px solid hsl(var(--planet-hue) 75% 72% / .38);border-radius:50%;transform:rotateX(66deg)}
+.section-switch .nav-item.active .nav-planet{box-shadow:0 0 11px hsl(var(--planet-hue) 90% 66% / .9)}
+.section-switch .nav-item.active .nav-planet::after{border-color:hsl(var(--planet-hue) 88% 76% / .85);animation:nav-orbit 7s linear infinite}
+@keyframes nav-orbit{from{transform:rotateX(66deg) rotateZ(0deg)}
+to{transform:rotateX(66deg) rotateZ(360deg)}
+}
+.nav-copy{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:0;line-height:1.15}
+.nav-name{font-size:12px;font-weight:650;line-height:1.2}
+.nav-caption{font-size:9.5px;font-weight:500;color:var(--text-muted);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.section-switch .nav-item.active .nav-planet::after{animation:none}
+}
 .mobile-actions{display:flex;align-items:center;gap:8px}
 .theory-grade-row{display:flex;align-items:center;gap:17px;margin:4px 0 22px}
 .theory-grade-row>span{flex:0 0 auto;color:var(--text-muted);font-size:12px;font-weight:650}
@@ -468,6 +481,16 @@ to{opacity:1}
 [data-theme=mint-comic] .practice-card{transform:rotate(-.12deg)}
 [data-theme=peach-rhythm] .practice-card,[data-theme=peach-rhythm] .reward-bar,[data-theme=peach-rhythm] .lesson{border-radius:27px}
 [data-theme=peach-rhythm] .mastery-panel,[data-theme=peach-rhythm] .workshop-hero{background:var(--green)}
+[data-theme=observatory] .section-switch{background:rgba(8,11,32,.55);border:1px solid rgba(157,180,255,.14)}
+[data-theme=observatory] .section-switch button{color:#a7b0d8}
+[data-theme=observatory] .section-switch button.active{color:var(--gold);background:rgba(21,26,63,.92);box-shadow:inset 0 0 0 1px rgba(255,217,124,.28),0 0 16px rgba(255,217,124,.1)}
+[data-theme=observatory] .nav-caption{color:#7681ad}
+[data-theme=observatory] .reward-bar{background:color-mix(in oklch,var(--paper) 78%,transparent);border-color:rgba(157,180,255,.2);box-shadow:0 12px 36px rgba(3,6,24,.6),inset 0 1px 0 rgba(157,180,255,.08);backdrop-filter:blur(8px)}
+[data-theme=observatory] .reward-theme:hover{background:rgba(157,180,255,.08)}
+[data-theme=observatory] .plus-balance>strong{text-shadow:0 0 14px rgba(255,217,124,.5)}
+[data-theme=observatory] .arena-button:hover,[data-theme=observatory] .account-button:hover{color:var(--gold);background:rgba(255,217,124,.08)}
+[data-theme=observatory] .mobile-drawer{background:#10143a}
+[data-theme=observatory] .grade-label,[data-theme=observatory] .topic-label{color:#7681ad}
 @media(max-width:1220px){.reward-bar{grid-template-columns:minmax(0,1fr) auto auto}
 .plus-balance{min-width:155px;padding-inline:13px}
 .account-button{min-width:95px;padding-inline:12px}
