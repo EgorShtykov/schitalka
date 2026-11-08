@@ -1,5 +1,16 @@
 export const themes = [
   {
+    id: "observatory",
+    name: "Обсерватория",
+    shortName: "Обсерватория",
+    price: 0,
+    currency: "plus",
+    tagline: "Твоя звёздная система",
+    description: "Глубокий индиго, звёздная пыль и золото далёких огней.",
+    accessory: "Звёздная искра",
+    swatches: ["#0a0e27", "#151a3f", "#ffd97c", "#9db4ff"],
+  },
+  {
     id: "classic",
     name: "Классика",
     shortName: "Классика",

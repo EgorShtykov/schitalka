@@ -771,3 +771,11 @@ to{opacity:1}
 .race-progress>span{transition:none}
 }
 
+
+/* Observatory: базовая тема вселенной */
+[data-theme=observatory] .app-shell{background-image:radial-gradient(circle at 12% 22%,color-mix(in oklch,var(--paper) 70%,transparent) 0 1px,transparent 1.6px),radial-gradient(circle at 72% 12%,color-mix(in oklch,var(--gold) 75%,transparent) 0 1px,transparent 1.6px),radial-gradient(circle at 87% 62%,color-mix(in oklch,var(--paper) 55%,transparent) 0 1px,transparent 1.6px),radial-gradient(circle at 43% 79%,color-mix(in oklch,var(--light-green) 55%,transparent) 0 1px,transparent 1.6px),radial-gradient(circle at 62% 38%,color-mix(in oklch,#7b3fa0 14%,transparent),transparent 44%),radial-gradient(circle at 18% 82%,color-mix(in oklch,#31439b 18%,transparent),transparent 40%);background-size:230px 250px,290px 270px,330px 310px,250px 290px,100% 100%,100% 100%}
+[data-theme=observatory] .mobile-header{background:color-mix(in oklch,var(--mint) 92%,transparent)}
+[data-theme=observatory] .mastery-label,[data-theme=observatory] .workshop-hero .eyebrow{color:var(--on-accent)}
+[data-theme=observatory] .mastery-track>span{background:var(--on-accent)}
+[data-theme=observatory] .workshop-wallet>svg{color:var(--paper)}
+[data-theme=observatory] .live-label{color:var(--green);background:var(--paper)}

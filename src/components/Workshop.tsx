@@ -108,7 +108,7 @@ export function Workshop(props: WorkshopProps) {
 
       <div className="theme-grid">
         {themes.map((theme) => {
-          const owned = theme.id === "classic" || props.purchasedThemeIds.includes(theme.id);
+          const owned = theme.price === 0 || props.purchasedThemeIds.includes(theme.id);
           const active = props.selectedTheme === theme.id;
           const previewing = props.previewTheme === theme.id;
           const busy = props.busyTheme === theme.id;

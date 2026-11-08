@@ -81,7 +81,7 @@ export const accountRouter = createRouter({
         }).$returningId();
         const id = inserted[0]?.id;
         if (!id) throw new Error("User id was not returned");
-        await tx.insert(studentStats).values({ userId: id, grade: input.grade });
+        await tx.insert(studentStats).values({ userId: id, grade: input.grade, selectedTheme: "observatory" });
         return id;
       });
     } catch (error) {

@@ -35,6 +35,7 @@ const BASE: WorldPalette = {
 
 const BY_THEME: Record<string, Partial<WorldPalette>> = {
   classic: {},
+  observatory: {},
   "sakura-neon": {
     nebulaA: "#5b2050",
     nebulaB: "#b03a8e",

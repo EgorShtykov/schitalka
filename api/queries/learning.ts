@@ -19,7 +19,7 @@ export async function ensureStudentStats(userId: number) {
   const existing = await getDb().select().from(studentStats).where(eq(studentStats.userId, userId)).limit(1);
   if (existing[0]) return existing[0];
   try {
-    await getDb().insert(studentStats).values({ userId });
+    await getDb().insert(studentStats).values({ userId, selectedTheme: "observatory" });
   } catch {
     // A simultaneous first request may have created the row already.
   }
@@ -231,7 +231,9 @@ export async function purchaseTheme(userId: number, themeId: string) {
 }
 
 export async function selectOwnedTheme(userId: number, themeId: string) {
-  if (themeId !== "classic") {
+  const theme = getTheme(themeId);
+  if (theme.id !== themeId) throw new TRPCError({ code: "NOT_FOUND", message: "Такого оформления нет" });
+  if (theme.price > 0) {
     const owned = await getDb().select().from(purchasedThemes).where(and(
       eq(purchasedThemes.userId, userId), eq(purchasedThemes.themeId, themeId),
     )).limit(1);

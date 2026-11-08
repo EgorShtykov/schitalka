@@ -73,6 +73,11 @@ export function CatMascot({ happy = false, themeId = "classic" }: CatMascotProps
           <circle cx="60" cy="29" r="3" fill="var(--paper)" stroke="none" />
         </g>
       )}
+      {themeId === "observatory" && (
+        <g className="cat-accessory" strokeLinejoin="round">
+          <path d="m92 14 2.4 6.4 6.6.4-5.1 4.2 1.6 6.4-5.5-3.6-5.5 3.6 1.6-6.4-5.1-4.2 6.6-.4Z" fill="var(--gold)" stroke="var(--brown)" strokeWidth="2" />
+        </g>
+      )}
       {themeId === "sticker-pop" && (
         <g className="cat-accessory" strokeLinejoin="round">
           <path d="m91 16 5 10 11 1-8 7 3 11-11-6-10 6 2-11-8-7 11-1Z" fill="var(--paper)" stroke="var(--paper)" strokeWidth="7" />

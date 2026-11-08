@@ -135,7 +135,7 @@ export default function App() {
   const [progress, setProgress] = useState<ProgressState>(loadProgress);
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
-  const [previewTheme, setPreviewTheme] = useState("classic");
+  const [previewTheme, setPreviewTheme] = useState("observatory");
   const [workshopError, setWorkshopError] = useState("");
   const [busyTheme, setBusyTheme] = useState<string | null>(null);
   const [syncError, setSyncError] = useState("");
@@ -591,7 +591,7 @@ export default function App() {
       /* Account isolation does not depend on tab storage. */
     }
     setProgress(emptyProgress);
-    setPreviewTheme("classic");
+    setPreviewTheme("observatory");
     setSyncError("");
     utils.progress.state.reset();
   };
@@ -604,7 +604,7 @@ export default function App() {
     }
     utils.progress.state.reset();
     setProgress(loadProgress());
-    setPreviewTheme("classic");
+    setPreviewTheme("observatory");
     setRewardNotice("");
     setSyncError("");
   };
@@ -921,7 +921,7 @@ export default function App() {
         ) : view === "workshop" ? (
           <Workshop
             selectedTheme={
-              isAuthenticated ? (cloud?.selectedTheme ?? "classic") : "classic"
+              isAuthenticated ? (cloud?.selectedTheme ?? "observatory") : "observatory"
             }
             previewTheme={previewTheme}
             plusBalance={plusBalance}
@@ -936,8 +936,8 @@ export default function App() {
             onResetPreview={() =>
               setPreviewTheme(
                 isAuthenticated
-                  ? (cloud?.selectedTheme ?? "classic")
-                  : "classic"
+                  ? (cloud?.selectedTheme ?? "observatory")
+                  : "observatory"
               )
             }
             onLogin={() => setAccountOpen(true)}

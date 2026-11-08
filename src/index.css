@@ -37,6 +37,24 @@
   text-rendering: optimizeLegibility;
 }
 
+:root[data-theme='observatory'] {
+  --cream: #f2f4ff;
+  --blush: #2a3160;
+  --brown: #eef1ff;
+  --orange: #ffd97c;
+  --light-green: #9db4ff;
+  --green: #ffd97c;
+  --gold: #ffd97c;
+  --paper: #151a3f;
+  --mint: #151a3f;
+  --ink-muted: #a7b0d8;
+  --blue-cat: #9db4ff;
+  --coral: #ff9ea8;
+  --on-accent: #0a0e27;
+  --background: #0a0e27;
+  color-scheme: dark;
+}
+
 :root[data-theme='sakura-neon'] {
   --cream: #fff0f7;
   --blush: #5a274f;
