@@ -227,3 +227,13 @@
   color: #7a86b8;
   font-size: 13.5px;
 }
+
+.world-diary{margin-top:22px;padding:18px 20px;background:rgba(21,26,63,.6);border:1px solid rgba(157,180,255,.18);border-radius:16px}
+.world-diary-title{display:flex;align-items:center;gap:8px;margin:0;color:#ffd97c;font-size:16px}
+.world-diary-sub{margin:6px 0 14px;color:#a7b0d8;font-size:12px}
+.world-diary-list{display:grid;gap:8px}
+.world-diary-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;color:#eef1ff;background:rgba(157,180,255,.07);border:1px solid rgba(157,180,255,.14);border-radius:11px;font-size:13.5px;font-weight:600;text-align:left;cursor:pointer;transition:background-color .16s ease-out,transform .16s ease-out}
+.world-diary-item:hover:not(:disabled){background:rgba(157,180,255,.14);transform:translateY(-1px)}
+.world-diary-item:disabled{cursor:default;opacity:.45}
+.world-diary-state{font-size:11px;color:#a7b0d8;font-weight:500}
+.world-diary-item:not(:disabled) .world-diary-state{color:#ffd97c}

@@ -1,17 +1,26 @@
 import { useMemo, useRef, useState } from "react";
-import { Camera, Rocket } from "lucide-react";
+import { BookOpenText, Camera, Lock, Rocket } from "lucide-react";
 import { PlanetCanvas, type PlanetCanvasRef } from "../world/PlanetCanvas";
 import observerHello from "../assets/avatar/observer-hello.webp";
 import { buildWorldSpec, type WorldInput } from "../world/worldData";
+import type { StoryChapter } from "../story/chapters";
 import "./WorldPage.css";
+
+interface DiaryEntry {
+  chapter: StoryChapter;
+  unlocked: boolean;
+  read: boolean;
+}
 
 interface WorldPageProps {
   input: WorldInput;
   themeId: string;
+  diary: DiaryEntry[];
+  onOpenChapter: (id: string) => void;
 }
 
 /** Страница «Моя планета»: живая планета, которая растёт от решённых заданий. */
-export function WorldPage({ input, themeId }: WorldPageProps) {
+export function WorldPage({ input, themeId, diary, onOpenChapter }: WorldPageProps) {
   const canvasRef = useRef<PlanetCanvasRef>(null);
   const [notice, setNotice] = useState("");
 
@@ -76,6 +85,35 @@ export function WorldPage({ input, themeId }: WorldPageProps) {
         <div><strong>{spec.constellations.length}</strong><span>созвездий</span></div>
         <div><strong>{lanterns}</strong><span>{lanterns === 1 ? "фонарь" : lanterns >= 2 && lanterns <= 4 ? "фонаря" : "фонарей"}</span></div>
         <div><strong>{input.trophies.gold + input.trophies.silver + input.trophies.bronze}</strong><span>кубков</span></div>
+      </div>
+
+      <div className="world-diary" aria-label="Дневник хранителя">
+        <h2 className="world-diary-title">
+          <BookOpenText size={16} aria-hidden="true" /> Дневник хранителя
+        </h2>
+        <p className="world-diary-sub">Главы открываются делом: сериями, секторами и гонками.</p>
+        <div className="world-diary-list">
+          {diary.map(entry => (
+            <button
+              key={entry.chapter.id}
+              type="button"
+              className={`world-diary-item ${entry.unlocked ? "" : "locked"}`}
+              disabled={!entry.unlocked}
+              onClick={() => onOpenChapter(entry.chapter.id)}
+            >
+              <span className="world-diary-name">
+                {entry.unlocked ? entry.chapter.title : "???"}
+              </span>
+              <span className="world-diary-state">
+                {entry.unlocked ? (
+                  entry.read ? "прочитана" : "новая"
+                ) : (
+                  <Lock size={13} aria-hidden="true" />
+                )}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <details className="world-legend">

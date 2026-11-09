@@ -43,6 +43,15 @@ import type { CloudState, ProgressState, TopicId } from "@contracts/learning";
 import { emptyProgress, topicIds } from "@contracts/learning";
 import type { WorldInput } from "./world/worldData";
 import { buildGalaxySpec } from "./world/galaxyData";
+import {
+  STORY_CHAPTERS,
+  getChapter,
+  loadReadChapters,
+  nextUnreadChapter,
+  saveReadChapters,
+  unlockedChapterIds,
+  type StoryChapter,
+} from "./story/chapters";
 
 const WorldPage = lazy(() =>
   import("./components/WorldPage").then((module) => ({ default: module.WorldPage }))
@@ -52,6 +61,9 @@ const IntroView = lazy(() =>
 );
 const GalaxyMap = lazy(() =>
   import("./components/GalaxyMap").then((module) => ({ default: module.GalaxyMap }))
+);
+const ChapterView = lazy(() =>
+  import("./components/ChapterView").then((module) => ({ default: module.ChapterView }))
 );
 
 type AnswerStatus = "idle" | "correct" | "wrong" | "revealed";
@@ -252,6 +264,54 @@ export default function App() {
     () => `${grade}:${galaxySpec.bodies.map(body => body.id).join(",")}`,
     [grade, galaxySpec]
   );
+
+  // Сюжет «Тысяча огней»: главы открываются прогрессом, читаются один раз.
+  const storyStats = useMemo(
+    () => ({
+      bestStreak: progress.bestStreak,
+      masteredCount: gradeTopics.filter(
+        topic => getTopicMastery(progress.masteryTopics[topic.id]).complete
+      ).length,
+      totalTopics: gradeTopics.length,
+      trophies: trophies.gold + trophies.silver + trophies.bronze,
+    }),
+    [progress.bestStreak, progress.masteryTopics, gradeTopics, trophies]
+  );
+  const [readChapters, setReadChapters] = useState<string[]>(loadReadChapters);
+  const [activeChapter, setActiveChapter] = useState<{
+    chapter: StoryChapter;
+    firstRead: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!introSeen || activeChapter) return;
+    const next = nextUnreadChapter(storyStats, readChapters);
+    if (next) setActiveChapter({ chapter: next, firstRead: true });
+  }, [introSeen, storyStats, readChapters, activeChapter]);
+
+  const closeChapter = () => {
+    if (activeChapter?.firstRead) {
+      setReadChapters(previous => {
+        const next = [...previous, activeChapter.chapter.id];
+        saveReadChapters(next);
+        return next;
+      });
+    }
+    setActiveChapter(null);
+  };
+  const openChapterFromDiary = (id: string) => {
+    const chapter = getChapter(id);
+    if (chapter) setActiveChapter({ chapter, firstRead: false });
+  };
+  const diaryChapters = useMemo(() => {
+    const unlocked = new Set(unlockedChapterIds(storyStats));
+    const read = new Set(readChapters);
+    return STORY_CHAPTERS.map(chapter => ({
+      chapter,
+      unlocked: unlocked.has(chapter.id) || read.has(chapter.id),
+      read: read.has(chapter.id),
+    }));
+  }, [storyStats, readChapters]);
   const syncLabel = !isAuthenticated
     ? "Локально · в этом браузере"
     : migrateMutation.isPending || attemptMutation.isPending
@@ -967,7 +1027,12 @@ export default function App() {
           />
         ) : view === "world" ? (
           <Suspense fallback={<p className="world-loading">Запускаем планету…</p>}>
-            <WorldPage input={worldInput} themeId={previewTheme} />
+            <WorldPage
+              input={worldInput}
+              themeId={previewTheme}
+              diary={diaryChapters}
+              onOpenChapter={openChapterFromDiary}
+            />
           </Suspense>
         ) : view === "competition" ? (
           <CompetitionPage
@@ -1513,6 +1578,15 @@ export default function App() {
         </Suspense>
       )}
       {warping && <div className="warp-overlay" aria-hidden="true" />}
+      {activeChapter && (
+        <Suspense fallback={null}>
+          <ChapterView
+            chapter={activeChapter.chapter}
+            firstRead={activeChapter.firstRead}
+            onClose={closeChapter}
+          />
+        </Suspense>
+      )}
       <AccountDialog
         open={accountOpen}
         user={user}
