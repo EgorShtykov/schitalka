@@ -42,12 +42,16 @@ import { trpc } from "./providers/trpc";
 import type { CloudState, ProgressState, TopicId } from "@contracts/learning";
 import { emptyProgress, topicIds } from "@contracts/learning";
 import type { WorldInput } from "./world/worldData";
+import { buildGalaxySpec } from "./world/galaxyData";
 
 const WorldPage = lazy(() =>
   import("./components/WorldPage").then((module) => ({ default: module.WorldPage }))
 );
 const IntroView = lazy(() =>
   import("./components/IntroView").then((module) => ({ default: module.IntroView }))
+);
+const GalaxyMap = lazy(() =>
+  import("./components/GalaxyMap").then((module) => ({ default: module.GalaxyMap }))
 );
 
 type AnswerStatus = "idle" | "correct" | "wrong" | "revealed";
@@ -234,6 +238,20 @@ export default function App() {
     ),
     trophies,
   };
+  const galaxySpec = useMemo(() => {
+    const masteryById: Record<string, ReturnType<typeof getTopicMastery>> = {};
+    for (const topic of gradeTopics) {
+      masteryById[topic.id] = getTopicMastery(progress.masteryTopics[topic.id]);
+    }
+    return buildGalaxySpec(grade, gradeTopics, masteryById, {
+      seed: worldInput.seed,
+      showStipend: user?.role !== "admin",
+    });
+  }, [grade, gradeTopics, progress.masteryTopics, worldInput.seed, user?.role]);
+  const galaxyStructureKey = useMemo(
+    () => `${grade}:${galaxySpec.bodies.map(body => body.id).join(",")}`,
+    [grade, galaxySpec]
+  );
   const syncLabel = !isAuthenticated
     ? "Локально · в этом браузере"
     : migrateMutation.isPending || attemptMutation.isPending
@@ -527,6 +545,26 @@ export default function App() {
     setTopicId(value);
     setView("practice");
     setMenuOpen(false);
+  };
+  const [warping, setWarping] = useState(false);
+  const handleGalaxySelect = (id: string) => {
+    if (id === "mixed" || topicIds.includes(id as (typeof topicIds)[number])) {
+      selectTopic(id);
+      window.setTimeout(() => {
+        document
+          .querySelector(".topic-heading")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 450);
+      return;
+    }
+    // Направление сайта: варп-вспышка и перелёт в раздел.
+    setWarping(true);
+    window.setTimeout(() => {
+      setView(id as AppView);
+      setWarping(false);
+      setMenuOpen(false);
+      window.scrollTo({ top: 0 });
+    }, 640);
   };
   const startPractice = (value?: string) => {
     setTopicId(value ?? "mixed");
@@ -975,6 +1013,21 @@ export default function App() {
           />
         ) : (
           <>
+            <section className="galaxy-section" aria-label="Карта галактики">
+              <Suspense
+                fallback={<div className="galaxy-loading">Загружаем карту галактики…</div>}
+              >
+                <GalaxyMap
+                  spec={galaxySpec}
+                  structureKey={galaxyStructureKey}
+                  themeId={previewTheme}
+                  seed={worldInput.seed}
+                  selectedId={topicId}
+                  onSelect={handleGalaxySelect}
+                />
+              </Suspense>
+            </section>
+
             <section className="topic-heading">
               <div>
                 <div className="eyebrow">Учебный маршрут · {grade} класс</div>
@@ -1459,6 +1512,7 @@ export default function App() {
           <IntroView onDone={finishIntro} />
         </Suspense>
       )}
+      {warping && <div className="warp-overlay" aria-hidden="true" />}
       <AccountDialog
         open={accountOpen}
         user={user}

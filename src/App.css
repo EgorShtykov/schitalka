@@ -491,6 +491,24 @@ to{opacity:1}
 [data-theme=observatory] .arena-button:hover,[data-theme=observatory] .account-button:hover{color:var(--gold);background:rgba(255,217,124,.08)}
 [data-theme=observatory] .mobile-drawer{background:#10143a}
 [data-theme=observatory] .grade-label,[data-theme=observatory] .topic-label{color:#7681ad}
+.galaxy-section{margin-top:18px}
+.galaxy-map-wrap{position:relative;overflow:hidden;border:1px solid rgba(157,180,255,.2);border-radius:18px;background:#0a0e27;box-shadow:0 14px 40px rgba(3,6,24,.55)}
+.galaxy-map{height:min(62vh,540px);min-height:340px}
+.galaxy-map canvas{display:block}
+.galaxy-tooltip{position:fixed;z-index:60;pointer-events:none;display:flex;flex-direction:column;gap:1px;padding:7px 11px;color:#eef1ff;background:rgba(13,17,45,.92);border:1px solid rgba(157,180,255,.3);border-radius:10px;font-size:12px;box-shadow:0 8px 24px rgba(3,6,24,.5)}
+.galaxy-tooltip span{font-size:10px;color:#a7b0d8}
+.galaxy-hint{position:absolute;right:14px;bottom:10px;margin:0;pointer-events:none;font-size:10.5px;color:#7681ad}
+.galaxy-loading{display:grid;place-items:center;height:min(62vh,540px);min-height:340px;color:#a7b0d8;background:#0a0e27;border:1px solid rgba(157,180,255,.2);border-radius:18px;font-size:13px}
+.warp-overlay{position:fixed;inset:0;z-index:95;pointer-events:none;background:radial-gradient(circle at 50% 50%,rgba(255,246,216,.95),rgba(157,180,255,.35) 40%,rgba(10,14,39,0) 72%);animation:warp-flash .64s ease-in both}
+@keyframes warp-flash{0%{opacity:0;transform:scale(.55)}
+35%{opacity:1}
+100%{opacity:0;transform:scale(1.65)}
+}
+@media (prefers-reduced-motion:reduce){.warp-overlay{animation-duration:.2s}
+}
+@media(max-width:600px){.galaxy-map,.galaxy-loading{height:340px;min-height:300px}
+.galaxy-hint{right:10px;left:10px;text-align:right}
+}
 @media(max-width:1220px){.reward-bar{grid-template-columns:minmax(0,1fr) auto auto}
 .plus-balance{min-width:155px;padding-inline:13px}
 .account-button{min-width:95px;padding-inline:12px}
